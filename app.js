@@ -15,8 +15,10 @@ app.use(express.urlencoded({ extended: true }));
 const path = require("path");
 
 
-app.use("/", require('./routers/sellerRoute'));
-
+app.use("/seller", require('./routers/sellerRoute'));
+app.use('/item', require('./routers/GeneralListing'))
+app.use('/item-management', require('./routers/ItemManagement'))
+app.use('/buyer', require('./routers/buyerRoute'))
 
 // if (process.env.NODE_ENV === "production") {
 //   app.use(express.static("client/build"));

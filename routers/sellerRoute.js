@@ -1,12 +1,12 @@
 const express = require('express');
 
 const Seller = require('../models/seller');
-
+const bcrypt = require('bcrypt');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 
 
-
-router.post('/seller-registration', async(req, res) => {
+router.post('/registration', async(req, res) => {
     try {
         const { phone, email, password, state } = req.body;
         const seller = new Seller({
@@ -28,7 +28,7 @@ router.post('/seller-registration', async(req, res) => {
 });
 
 // Update a seller - Step 2: Additional Details
-router.put('/seller-details/:s_id', async(req, res) => {
+router.put('/details/:s_id', async(req, res) => {
     try {
         const { s_id } = req.params;
         const { fullName, dateOfBirth, currentAddress, addressProof, bankDetails, escrowTermsAccepted, sellerVerificationDocuments, highestQualification, draft } = req.body;
@@ -57,8 +57,8 @@ router.put('/seller-details/:s_id', async(req, res) => {
     }
 });
 
-// Get a seller by ID
-router.get('/seller/:s_id', async(req, res) => {
+// Get a seller by ID for admin use
+router.get('/:s_id', async(req, res) => {
     try {
         const { s_id } = req.params;
 
@@ -72,6 +72,35 @@ router.get('/seller/:s_id', async(req, res) => {
     } catch (error) {
         console.error('Error retrieving seller', error);
         res.status(500).json({ error: 'Failed to retrieve seller' });
+    }
+});
+
+//login seller 
+router.post('/login', async(req, res) => {
+    const { emailOrPhone, password } = req.body;
+
+    try {
+        const seller = await Seller.findOne({
+            $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
+        });
+
+        if (!seller) {
+            return res.status(404).json({ error: 'Seller not found' });
+        }
+
+        // Compare the password with the hashed password
+        const isPasswordMatch = await bcrypt.compare(password, seller.password);
+
+        if (!isPasswordMatch) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+
+        const token = jwt.sign({ userId: seller.s_id }, process.env.JWT_SECRET_KEY);
+
+        res.json({ message: 'Login successful', seller, token });
+    } catch (error) {
+        console.error('Error during seller login:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
