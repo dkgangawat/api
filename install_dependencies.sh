@@ -1,3 +1,2 @@
 #!/bin/bash
-npm install
-npm ci
+npm install >> ~/logs/last_install_dependencies.log

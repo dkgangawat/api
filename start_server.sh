@@ -1,3 +1,2 @@
 #!/bin/bash
-pwd
-npm run dev >> ~/logs/last_start.log
+npm run dev >> ~/logs/last_start_server.log
