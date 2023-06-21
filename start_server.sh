@@ -1,4 +1,3 @@
 #!/bin/bash
 pwd
-npm run dev
-exit 0
+npm run dev >> ~/logs/last_start.log
