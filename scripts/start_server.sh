@@ -1,2 +1,2 @@
-npm run dev
+sudo npm run dev
 exit 
