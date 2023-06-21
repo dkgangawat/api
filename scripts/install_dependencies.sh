@@ -1,3 +1,5 @@
-su - ec2-user -c 'cd /usr/local/nginx/html/node && npm install'
-npm ci
+#!/bin/bash
+source /root/.bash_profile
+sudo npm install
+sudo npm ci
 exit 0
