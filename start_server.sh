@@ -1,3 +1,3 @@
 #!/bin/bash
-cd /agrijod-backend
+cd agrijod-backend
 npm run start
