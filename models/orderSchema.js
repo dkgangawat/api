@@ -63,6 +63,6 @@ orderSchema.pre("save", async function(next) {
     next();
 })
 
-const Order = mongoose.model('Order', itemSchema);
+const Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;
