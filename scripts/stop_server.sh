@@ -1,1 +1,1 @@
-npm run dev
+exit 0
