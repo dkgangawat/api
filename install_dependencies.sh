@@ -1,3 +1,5 @@
 #!/bin/bash
+pwd
+sudo pwd
 npm --version
-npm install -g >> ~/last_install_dependencies.log
+sudo npm install >> ~/last_install_dependencies.log

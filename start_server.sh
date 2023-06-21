@@ -1,2 +1,2 @@
 #!/bin/bash
-npm run dev >> ~/last_start_server.log
+sudo npm run dev >> ~/last_start_server.log
