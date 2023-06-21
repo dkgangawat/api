@@ -1,3 +1,4 @@
 #!/bin/bash
-sudo npm run dev
-exit 
+pwd
+npm run dev
+exit 0

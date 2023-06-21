@@ -1,4 +1,4 @@
 #!/bin/bash
-sudo npm install
-sudo npm ci
+npm install
+npm ci
 exit 0
