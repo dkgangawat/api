@@ -1,5 +1,3 @@
 #!/bin/bash
-cd ~
-ls
-pwd
-npm run dev >> ~/last_start_server.log
+cd /agrijod-backend
+npm run start

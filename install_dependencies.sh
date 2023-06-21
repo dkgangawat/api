@@ -1,5 +1,8 @@
 #!/bin/bash
 npm --version
-cd ~
 ls
+pwd
+cd /agrijod-backend
+ls
+pwd
 npm install >> ~/last_install_dependencies.log
