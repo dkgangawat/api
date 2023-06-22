@@ -4,7 +4,7 @@ files:
   - source: /
     destination: /agrijod-backend
 hooks:
-  BeforeInstall:
+  AfterInstall:
     - location: install_dependencies.sh
       timeout: 120
       runas: root
