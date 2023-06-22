@@ -6,8 +6,8 @@ cd $(dirname $0)
 # Add environment variables to a .env file
 export MONGO_URI="$(aws ssm get-parameter --name MONGO_URI --query "Parameter.Value" --output text)"
 export JWT_SECRET_KEY="$(aws ssm get-parameter --name JWT_SECRET_KEY --query "Parameter.Value" --output text)"
-echo "MONGO_URI=$MONGO_URI" >> .env
-echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
+echo "MONGO_URI='$MONGO_URI'" >> .env
+echo "JWT_SECRET_KEY='$JWT_SECRET_KEY'" >> .env
 
 # Clean up
 rm -rf node_modules
