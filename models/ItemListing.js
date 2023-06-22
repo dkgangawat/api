@@ -15,6 +15,15 @@ const itemSchema = new mongoose.Schema({
     },
     sowingDate: {
         type: Date,
+        required: function() {
+            return this.harvestDate > new Date()
+        },
+        validate: {
+            validator: function(value) {
+                return value >= new Date();
+            },
+            message: "Sowing date cannot be in the past."
+        }
     },
     itemImages: [{
         type: String

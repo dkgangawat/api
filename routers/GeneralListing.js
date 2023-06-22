@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const Item = require('../models/ItemListing');
+const { authenticateToken } = require('../middlewares/authenticateToken');
 
 // Create a new item
-router.post('/', async(req, res) => {
+router.post('/', authenticateToken, async(req, res) => {
     try {
-        const { itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, seller, isDraft } = req.body
+        const seller = req.userId
+        const { itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, isDraft } = req.body
 
         const newItem = new Item({ itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, seller, isDraft });
         if (harvestDate.trim() && state.trim()) {

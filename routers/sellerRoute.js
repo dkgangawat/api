@@ -6,7 +6,8 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET_KEY } = require('../config/config');
 const { authenticateToken } = require('../middlewares/authenticateToken')
-const item = require('../models/ItemListing')
+const item = require('../models/ItemListing');
+const { generateToken } = require('../helper/generateToken');
 
 
 router.post('/registration', async(req, res) => {
@@ -26,7 +27,7 @@ router.post('/registration', async(req, res) => {
         // res.status(302).send(`<html><body><p> Redirecting to <a href=${`/seller-details/${}`}></a> </p></body></html>`)
     } catch (error) {
         console.error('Error creating seller', error);
-        res.status(500).json({ error: 'Failed to create seller' });
+        res.status(500).json({ error });
     }
 });
 
@@ -98,8 +99,8 @@ router.post('/login', async(req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
-        const token = jwt.sign({ userId: seller.s_id }, JWT_SECRET_KEY);
-
+        const token = generateToken(seller.s_id);
+        res.cookie('user', token)
         res.json({ message: 'Login successful', seller, token });
     } catch (error) {
         console.error('Error during seller login:', error);
@@ -110,7 +111,6 @@ router.post('/login', async(req, res) => {
 //item management
 router.get('/item-management', authenticateToken, async(req, res) => {
     const { userId } = req
-    console.log(userId)
     try {
         const items = await item.find({ seller: userId })
         res.json(items)

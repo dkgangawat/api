@@ -9,12 +9,15 @@ const sellerSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
+        match: [/^\d{10}$/, 'Phone number should be 10 digits']
     },
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email']
     },
     state: {
         type: String,

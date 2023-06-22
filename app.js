@@ -3,6 +3,7 @@ const cors = require("cors");
 const app = express();
 require("./config/db");
 require("dotenv").config();
+const cookieParser = require('cookie-parser');
 
 app.use(cors());
 // if (process.env.NODE_ENV !== "production") {
@@ -11,6 +12,7 @@ app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const path = require("path");
 
