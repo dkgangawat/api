@@ -1,4 +1,4 @@
-function getStateInitials(stateName) {
+const getStateInitials = (stateName) => {
   const stateMap = {
     'Andaman and Nicobar Islands': 'AN',
     'Andhra Pradesh': 'AP',
@@ -39,6 +39,6 @@ function getStateInitials(stateName) {
   };
 
   return stateMap[stateName] || 'XX';
-}
+};
 
 module.exports = getStateInitials;
