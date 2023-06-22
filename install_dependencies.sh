@@ -14,6 +14,7 @@ rm -rf /usr/local/lib/node*
 rm -rf /usr/local/bin/node*
 rm -rf /usr/local/include/node*
 rm -rf ./node_modules
+rm -rf ./package-lock.json
 yum remove -y nodejs npm
 yum -y autoremove
 yum -y clean all
