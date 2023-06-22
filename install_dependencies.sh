@@ -19,8 +19,11 @@ yum -y autoremove
 yum -y clean all
 
 # Node JS and NPM installation
-curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - &&\
-yum install -y npm nodejs
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+chmod +x ~/.nvm/nvm.sh
+source ~/.nvm/nvm.sh
+nvm install 16
+node -e "console.log('Running Node.js ' + process.version)"
 
 # Install dependencies
 npm install -g forever
