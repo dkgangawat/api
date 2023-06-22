@@ -12,6 +12,9 @@ echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> ./.env
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - &&\
 yum install -y nodejs
 
+# Clean up
+rm -rf ./node_modules
+
 # Install dependencies
 npm install -g forever
 npm install -g pm2
