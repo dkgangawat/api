@@ -13,7 +13,7 @@ rm -rf /usr/local/bin/npm /usr/local/share/man/man1/node* ~/.npm
 rm -rf /usr/local/lib/node*
 rm -rf /usr/local/bin/node*
 rm -rf /usr/local/include/node*
-yum purge nodejs npm
+yum remove -y nodejs
 yum autoremove
 rm -rf ./node_modules
 
