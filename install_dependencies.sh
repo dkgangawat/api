@@ -26,6 +26,5 @@ nvm install 16
 node -e "console.log('Running Node.js ' + process.version)"
 
 # Install dependencies
-npm install -g forever
-npm install -g pm2
 npm install
+npm install pm2 -g
