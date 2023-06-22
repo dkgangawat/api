@@ -9,15 +9,8 @@ echo "MONGO_URI=$MONGO_URI" >> ./.env
 echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> ./.env
 
 # Clean up
-rm -rf /usr/local/bin/npm /usr/local/share/man/man1/node* ~/.npm
-rm -rf /usr/local/lib/node*
-rm -rf /usr/local/bin/node*
-rm -rf /usr/local/include/node*
-rm -rf ./node_modules
-rm -rf ./package-lock.json
-yum remove -y nodejs npm
-yum -y autoremove
-yum -y clean all
+rm -rf node_modules
+rm -f package-lock.json
 
 # Node JS and NPM installation
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
