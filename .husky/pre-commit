@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npm run lint -- --fix
+# Retry commit after linting
+[ $? -eq 0 ] || exit 1
