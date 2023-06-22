@@ -5,6 +5,7 @@ const Item = require('../models/ItemListing')
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET_KEY } = require('../config/config');
 
 
 router.post('/registration', async(req, res) => {
@@ -89,7 +90,7 @@ router.post('/login', async(req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
-        const token = jwt.sign({ userId: buyer.b_id }, process.env.JWT_SECRET_KEY);
+        const token = jwt.sign({ userId: buyer.b_id }, JWT_SECRET_KEY);
 
         res.json({ message: 'Login successful', buyer, token });
     } catch (error) {

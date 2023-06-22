@@ -4,6 +4,9 @@ const Seller = require('../models/seller');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET_KEY } = require('../config/config');
+const { authenticateToken } = require('../middlewares/authenticateToken')
+const item = require('../models/ItemListing')
 
 
 router.post('/registration', async(req, res) => {
@@ -58,7 +61,7 @@ router.put('/details/:s_id', async(req, res) => {
 });
 
 // Get a seller by ID for admin use
-router.get('/:s_id', async(req, res) => {
+router.get('/specific/:s_id', async(req, res) => {
     try {
         const { s_id } = req.params;
 
@@ -95,7 +98,7 @@ router.post('/login', async(req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
-        const token = jwt.sign({ userId: seller.s_id }, process.env.JWT_SECRET_KEY);
+        const token = jwt.sign({ userId: seller.s_id }, JWT_SECRET_KEY);
 
         res.json({ message: 'Login successful', seller, token });
     } catch (error) {
@@ -104,6 +107,19 @@ router.post('/login', async(req, res) => {
     }
 });
 
+//item management
+router.get('/item-management', authenticateToken, async(req, res) => {
+    const { userId } = req
+    console.log(userId)
+    try {
+        const items = await item.find({ seller: userId })
+        res.json(items)
+    } catch (error) {
+        console.error('Error retrieving items:', error);
+        res.status(500).json({ error: 'Internal server error' });
+
+    }
+})
 
 
 module.exports = router;

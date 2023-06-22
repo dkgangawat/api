@@ -13,11 +13,11 @@ router.post('/', async(req, res) => {
             const createdItme = await newItem.save();
             res.status(201).json(createdItme);
         } else {
-            res.status(400).json({ message: "harvest date and state must required to a item" });
+            res.status(500).json({ message: "harvest date and state must required to a item" });
         }
 
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -28,7 +28,7 @@ router.put('/:itemID', async(req, res) => {
         const item = await Item.findOneAndUpdate({ itemID }, req.body, { omitUndefined: true });
         res.json(item);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -42,7 +42,7 @@ router.get('/:itemID', async(req, res) => {
         }
         res.json(item);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 

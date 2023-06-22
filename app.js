@@ -17,7 +17,6 @@ const path = require("path");
 
 app.use("/seller", require('./routers/sellerRoute'));
 app.use('/item', require('./routers/GeneralListing'))
-app.use('/item-management', require('./routers/ItemManagement'))
 app.use('/buyer', require('./routers/buyerRoute'))
 app.use('/add-to-cart', require('./routers/addToCart'))
 

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const { generateSellerID } = require('../helper/generateUniqueId');
 
 const sellerSchema = new mongoose.Schema({
     s_id: {
@@ -67,9 +68,7 @@ sellerSchema.pre('save', async function(next) {
         const hashedPassword = await bcrypt.hash(this.password, saltRounds);
         this.password = hashedPassword;
         if (!this.s_id) {
-            const stateInitials = this.state.toUpperCase().replace(/\s+/g, '').substring(0, 2);
-            const randomId = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit random number
-            this.s_id = `S-${stateInitials}-${randomId}`;
+            this.s_id = generateSellerID(this.state);
         }
     }
     next();

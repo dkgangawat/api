@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { generateItemID } = require('../helper/generateItemId');
+const { generateItemID } = require('../helper/generateUniqueId');
 
 const itemSchema = new mongoose.Schema({
     itemName: {
