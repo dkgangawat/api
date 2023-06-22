@@ -3,7 +3,8 @@ source ~/.bashrc
 cd $(dirname $0)
 
 # Stop npm scripts
-pm2 stop npm
+pm2 stop "agrijod-backend"
+pm2 delete "agrijod-backend"
 
 # Remove pm2
 npm uninstall pm2 -g
