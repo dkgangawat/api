@@ -20,7 +20,7 @@ yum -y clean all
 
 # Node JS and NPM installation
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - &&\
-yum install -y nodejs npm
+yum install -y npm nodejs
 
 # Install dependencies
 npm install -g forever
