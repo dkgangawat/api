@@ -1,4 +1,6 @@
 #!/bin/bash
+source ~/.bashrc
+
 cd $(dirname $0)
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - &&\
 yum install -y nodejs
