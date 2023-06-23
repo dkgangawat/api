@@ -26,7 +26,7 @@ router.post('/registration', async(req, res) => {
 });
 
 // Update a Buyer - Step 2: Additional Details
-router.put('/details/:b_id', async(req, res) => {
+router.put('/details/:bId', async(req, res) => {
     try {
         const { bId } = req.params;
         const { fullName, dateOfBirth, currentAddress, establishmentYear, billingAddress } = req.body;
@@ -52,7 +52,7 @@ router.put('/details/:b_id', async(req, res) => {
 });
 
 // Get a buyer by ID for admin use
-router.get('/specific/:b_id', async(req, res) => {
+router.get('/specific/:bId', async(req, res) => {
     try {
         const { bId } = req.params;
 

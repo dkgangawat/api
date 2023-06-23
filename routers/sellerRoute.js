@@ -33,11 +33,11 @@ router.post('/registration', async(req, res) => {
 });
 
 // Update a seller - Step 2: Additional Details
-router.put('/details/:s_id', async(req, res) => {
+router.put('/details/:sId', async(req, res) => {
     try {
         const { sId } = req.params;
         const { fullName, dateOfBirth, currentAddress, addressProof, bankDetails, escrowTermsAccepted, sellerVerificationDocuments, highestQualification, draft } = req.body;
-        const seller = await Seller.findOne({ sId });
+        const seller = await Seller.findOne({ s_id: sId });
 
         if (!seller) {
             return res.status(404).json({ error: 'Seller not found' });
@@ -63,11 +63,11 @@ router.put('/details/:s_id', async(req, res) => {
 });
 
 // Get a seller by ID for admin use
-router.get('/specific/:s_id', async(req, res) => {
+router.get('/specific/:sId', async(req, res) => {
     try {
-        const { s_Id } = req.params;
+        const { sId } = req.params;
 
-        const seller = await Seller.findOne({ s_Id });
+        const seller = await Seller.findOne({ s_id: sId });
 
         if (!seller) {
             return res.status(404).json({ error: 'Seller not found' });
