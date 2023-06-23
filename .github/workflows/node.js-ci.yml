@@ -36,5 +36,16 @@ jobs:
         cache: 'npm'
     - name: Install dependencies
       run: npm install --save-dev && npm ci
-    - name: Start server
-      run: npm run start 
+    - name: Start server and Run a Deep Health Check post timeout
+      run: |
+        npm run start &
+        sleep 10
+        # Health check and exit with an error if response is not 200
+        if [ $(curl -s -I -o /dev/null -w '%{http_code}' http://localhost:8000/actuator/health/deep) != "200" ];
+        then
+          echo "Health check failed"
+          exit 1
+        else
+          echo "Health check passed"
+        fi
+
