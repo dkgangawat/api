@@ -20,9 +20,9 @@ const itemSchema = new mongoose.Schema({
         },
         validate: {
             validator: function(value) {
-                return value >= new Date();
+                return value <= this.harvestDate;
             },
-            message: "Sowing date cannot be in the past."
+            message: "Sowing date cannot be after harvest Date."
         }
     },
     itemImages: [{
