@@ -3,9 +3,7 @@ const express = require('express');
 const Buyer = require('../models/buyerSchema');
 const Item = require('../models/ItemListing')
 const bcrypt = require('bcrypt');
-const router = express.Router();
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET_KEY } = require('../config/config');
+const router = new express.Router();
 const { generateToken } = require('../helper/generateToken');
 
 
@@ -30,9 +28,9 @@ router.post('/registration', async(req, res) => {
 // Update a Buyer - Step 2: Additional Details
 router.put('/details/:b_id', async(req, res) => {
     try {
-        const { b_id } = req.params;
+        const { bId } = req.params;
         const { fullName, dateOfBirth, currentAddress, establishmentYear, billingAddress } = req.body;
-        const buyer = await Buyer.findOne({ b_id });
+        const buyer = await Buyer.findOne({ b_id: bId });
 
         if (!buyer) {
             return res.status(404).json({ error: 'buyer not found' });
@@ -56,9 +54,9 @@ router.put('/details/:b_id', async(req, res) => {
 // Get a buyer by ID for admin use
 router.get('/specific/:b_id', async(req, res) => {
     try {
-        const { b_id } = req.params;
+        const { bId } = req.params;
 
-        const buyer = await Buyer.findOne({ b_id });
+        const buyer = await Buyer.findOne({ b_id: bId });
 
         if (!buyer) {
             return res.status(404).json({ error: 'buyer not found' });

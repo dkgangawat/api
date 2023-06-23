@@ -74,10 +74,10 @@ router.post('/payment', async(req, res) => {
     }
 });
 
-// Utility function to calculate shipping cost based on dropoff location
-function calculateShippingCost(dropoffLocation) {
-    // Your shipping algorithm logic goes here
-    // Return the calculated shipping cost
-}
+
+// function calculateShippingCost(dropoffLocation) {
+//  shipping algorithm logic goes here
+// Return the calculated shipping cost
+// }
 
 module.exports = router;

@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use('/seller', require('./routers/sellerRoute'));
-app.use('/item', require('./routers/GeneralListing'));
+app.use('/item', require('./routers/generalListing'));
 app.use('/buyer', require('./routers/buyerRoute'));
 app.use('/add-to-cart', require('./routers/addToCart'));
 app.use('/transporter', require('./routers/transportRoute'))

@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const router = new express.Router();
 const Transporter = require('../models/transporterSchema');
 const { authenticateToken } = require('../middlewares/authenticateToken');
 const bcrypt = require('bcrypt');
