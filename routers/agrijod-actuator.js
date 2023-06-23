@@ -5,7 +5,7 @@ const options = {
   basePath: '/actuator',
   customEndpoints: [
     {
-      id: 'deep-health',
+      id: 'health/deep',
       controller: (_, res) => {
         const dbHealth = !!mongoose.connection.readyState;
         const servicesHealth = true;
