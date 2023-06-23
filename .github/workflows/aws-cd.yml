@@ -28,10 +28,7 @@ jobs:
           )
           echo "::set-output name=deployment-id::$(echo $out_json | jq -r '.deploymentId')"
 
-      - name: Check Deployment Status
+      - name: Wait for deployment to complete
         run: |
-          STATUS=$(aws deploy get-deployment --deployment-id ${{ steps.deploy.outputs.deployment-id }} --query "deploymentInfo.status" --output text)
-          echo "Deployment status: $STATUS"
-          if [ $STATUS != "Succeeded" ]; then
-            exit 1
-          fi
+          aws deploy wait deployment-successful \
+            --deployment-id ${{ steps.deploy.outputs.deployment-id }}
