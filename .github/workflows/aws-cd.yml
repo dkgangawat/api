@@ -2,10 +2,25 @@ name: AWS CD Pipeline
 on:
   push:
     branches: [ main, Deployment ]
+  workflow_run:
+    workflows: ["Node.js CI"]
+    types:
+      - completed
 
 jobs:
+  ci-output-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CI output and exit if failed
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" == "failure" ]; then
+            echo "CI failed, exiting..."
+            exit 1
+          fi
+
   continuous-deployment:
     runs-on: ubuntu-latest
+    needs: ci-output-check
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Deployment'
     steps:
       # Step 1
