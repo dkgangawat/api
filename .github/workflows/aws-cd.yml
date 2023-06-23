@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Check CI output and exit if failed
         run: |
-          export CI_STATUS=$(github.event.workflow_run.conclusion)
+          export CI_STATUS=${{ github.event.workflow_run.conclusion }}}
           echo "CI status: $CI_STATUS"
           if [ $CI_STATUS == "failure" ]; then
             exit 1
