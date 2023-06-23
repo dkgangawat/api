@@ -75,9 +75,11 @@ const itemSchema = new mongoose.Schema({
     },
 });
 
-//generating a item id 
+// generating a item id
 itemSchema.pre('save', async function(next) {
-    if (!this.s_id) { this.itemID = generateItemID(this.state, this.harvestDate) }
+    if (!this.s_id) {
+        this.itemID = generateItemID(this.state, this.harvestDate);
+    }
     next();
 });
 
