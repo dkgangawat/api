@@ -39,3 +39,11 @@ jobs:
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }} \
             --file-exists-behavior OVERWRITE
+      # Step 3
+      - name: Check Deployment Status
+        run: |
+          STATUS=$(aws deploy get-deployment --deployment-id ${{ steps.deploy.outputs.deployment-id }} --query "deploymentInfo.status" --output text)
+          echo "Deployment status: $STATUS"
+          if [ $STATUS == "Failed" ]; then
+            exit 1
+          fi
