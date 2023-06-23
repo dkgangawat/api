@@ -18,12 +18,15 @@ jobs:
       - name: Create CodeDeploy Deployment
         id: deploy
         run: |
-          aws deploy create-deployment \
-            --application-name agrizod_backend_alpha \
-            --deployment-group-name agrijod_backend_deployment_alpha \
-            --deployment-config-name CodeDeployDefault.OneAtATime \
-            --github-location repository=${{ github.repository }},commitId=${{ github.sha }} \
-            --file-exists-behavior OVERWRITE
+          export out_json=$(
+            aws deploy create-deployment \
+              --application-name agrizod_backend_alpha \
+              --deployment-group-name agrijod_backend_deployment_alpha \
+              --deployment-config-name CodeDeployDefault.OneAtATime \
+              --github-location repository=${{ github.repository }},commitId=${{ github.sha }} \
+              --file-exists-behavior OVERWRITE
+          )
+          echo "::set-output name=deployment-id::$(echo $out_json | jq -r '.deploymentId')"
 
       - name: Check Deployment Status
         run: |
