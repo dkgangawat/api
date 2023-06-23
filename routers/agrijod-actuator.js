@@ -11,7 +11,7 @@ const options = {
         const servicesHealth = true;
         const status = dbHealth && servicesHealth ? 200 : 503;
         res.status(status).json({
-          'server': 'UP',
+          'status': 'UP',
           'database': status ? 'UP' : 'DOWN',
         });
       },
