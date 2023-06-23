@@ -12,7 +12,7 @@ hooks:
     - location: start_server.sh
       timeout: 120
       runas: root
-  AfterAllowTraffic:
+  ValidateService:
     - location: health_check.sh
       timeout: 120
       runas: root
