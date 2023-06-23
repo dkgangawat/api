@@ -9,10 +9,6 @@ export JWT_SECRET_KEY="$(aws ssm get-parameter --name JWT_SECRET_KEY --query "Pa
 echo "MONGO_URI='$MONGO_URI'" >> .env
 echo "JWT_SECRET_KEY='$JWT_SECRET_KEY'" >> .env
 
-# Clean up
-rm -rf node_modules
-rm -f package-lock.json
-
 # Node JS and NPM installation
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 chmod +x ~/.nvm/nvm.sh

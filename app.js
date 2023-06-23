@@ -6,7 +6,7 @@ require('./config/db');
 require('dotenv').config();
 
 app.use(cors());
-app.use('/actuator', require('./routers/agrijod-actuator'));
+app.use(require('./routers/agrijod-actuator'));
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
