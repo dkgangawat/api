@@ -11,7 +11,7 @@ app.use(require('./routers/agrijod-actuator'));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-app.use('/seller', require('./routers/sellerRoute'));
+apKp.use('/seller', require('./routers/sellerRoute'));
 app.use('/item', require('./routers/GeneralListing'));
 app.use('/buyer', require('./routers/buyerRoute'));
 app.use('/add-to-cart', require('./routers/addToCart'));
