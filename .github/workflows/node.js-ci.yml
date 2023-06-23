@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "Deployment" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "Deployment" ]
 
 jobs:
   lint:
@@ -34,5 +34,5 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm install --save-dev
-    - run: npm ci
+    - name: Install dependencies
+      run: npm install --save-dev && npm ci
