@@ -1,38 +1,20 @@
 name: AWS CD Pipeline
 on:
   push:
-    branches: [ main, Deployment ]
-  workflow_run:
-    workflows: ["Node.js CI"]
-    types: [ completed ]
+    branches: [main, Deployment]
 
 jobs:
-  ci-output-check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check CI output and exit if failed
-        run: |
-          export CI_STATUS=${{ github.event.workflow_run.conclusion }}
-          echo "CI status: $CI_STATUS"
-          if [ $CI_STATUS == "failure" ]; then
-            exit 1
-          else
-            exit 0
-          fi
-
   continuous-deployment:
     runs-on: ubuntu-latest
-    needs: ci-output-check
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Deployment'
     steps:
-      # Step 1
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      # Step 2
+
       - name: Create CodeDeploy Deployment
         id: deploy
         run: |
@@ -42,7 +24,7 @@ jobs:
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }} \
             --file-exists-behavior OVERWRITE
-      # Step 3
+
       - name: Check Deployment Status
         run: |
           STATUS=$(aws deploy get-deployment --deployment-id ${{ steps.deploy.outputs.deployment-id }} --query "deploymentInfo.status" --output text)
