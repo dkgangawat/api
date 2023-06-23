@@ -4,8 +4,7 @@ on:
     branches: [ main, Deployment ]
   workflow_run:
     workflows: ["Node.js CI"]
-    types:
-      - completed
+    types: [ completed ]
 
 jobs:
   ci-output-check:
@@ -13,7 +12,7 @@ jobs:
     steps:
       - name: Check CI output and exit if failed
         run: |
-          if [ "${{ github.event.workflow_run.conclusion }}" == "failure" ]; then
+          if [ "${{ github.event.workflow_run.conclusion == 'failure' }}" ]; then
             echo "CI failed, exiting..."
             exit 1
           fi
