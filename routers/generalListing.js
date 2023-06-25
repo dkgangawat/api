@@ -11,13 +11,14 @@ router.post('/', async(req, res) => {
 
         const newItem = new Item({ itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, seller, isDraft });
         if (harvestDate.trim() && state.trim()) {
-            if (totalStock < minOrderAmount) { return res.status(400).json({ message: "total stocks should me more than minimum order amount" }) }
+            if (totalStock < minOrderAmount) {
+                return res.status(400).json({ message: 'total stocks should me more than minimum order amount' });
+            }
             const createdItme = await newItem.save();
             res.status(201).json(createdItme);
         } else {
-            res.status(500).json({ message: "harvest date and state must required to a item" });
+            res.status(500).json({ message: 'harvest date and state must required to a item' });
         }
-
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

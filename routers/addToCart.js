@@ -18,7 +18,7 @@ router.post('/', async(req, res) => {
             const productCost = item.price * orderSize;
 
             // Calculate shipping cost
-            let shippingCost = 0;
+            const shippingCost = 0;
             if (wantShipping && dropoffLocation) {
                 //  shipping algorithm to calculate the shipping cost based on dropoff location
                 // shippingCost = calculateShippingCost(dropoffLocation);

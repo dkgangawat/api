@@ -11,13 +11,13 @@ const buyerSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: [/^\d{10}$/, 'Phone number should be 10 digits']
+        match: [/^\d{10}$/, 'Phone number should be 10 digits'],
     },
     email: {
         type: String,
         required: true,
         unique: true,
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email']
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email'],
     },
     state: {
         type: String,
@@ -33,10 +33,6 @@ const buyerSchema = new mongoose.Schema({
     establishmentYear: String,
     billingAddress: String,
     currentAddress: String,
-    draft: {
-        type: Boolean,
-        default: true,
-    }
 });
 
 // generating a buyer id

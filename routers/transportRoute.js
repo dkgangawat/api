@@ -84,7 +84,7 @@ router.post('/login', async(req, res) => {
         }
 
         const token = generateToken(transporter.transporterID);
-        res.cookie('user', token)
+        res.cookie('user', token);
         res.json({ message: 'Login successful', transporter, token });
     } catch (error) {
         console.error('Error during transporter login:', error);

@@ -18,43 +18,29 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    transporterID: {
-        type: String
-    },
-
     itemID: {
         type: String,
-        required: true,
-    },
-    itemRef: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Item',
         required: true,
     },
     orderSize: {
         type: Number,
         required: true,
     },
-    sellerVerified: {
-        type: String,
+    sellerVarifide: {
+        type: Boolean,
         default: "pending",
         enum: ['pending', 'accept', 'reject', 'fullfilled']
     },
     paymentStatus: {
         type: String,
-        enum: ['null', 'initiated', 'completed', 'failed'],
+        enum: ['null', 'initiated', 'completed'],
         default: 'null',
-    },
-    status: {
-        type: String,
-        default: null
     },
     wantShipping: {
         type: Boolean,
     },
     dropoffLocation: {
         type: String,
-
     },
     productCost: {
         type: Number,

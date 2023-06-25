@@ -1,7 +1,7 @@
 const express = require('express');
 
 const Buyer = require('../models/buyerSchema');
-const Item = require('../models/ItemListing')
+const Item = require('../models/ItemListing');
 const bcrypt = require('bcrypt');
 const router = new express.Router();
 const { generateToken } = require('../helper/generateToken');
@@ -16,7 +16,7 @@ router.post('/registration', async(req, res) => {
             phone,
             email,
             password,
-            state
+            state,
         });
 
         const createdUser = await buyer.save();
@@ -73,7 +73,7 @@ router.get('/specific/:bId', async(req, res) => {
     }
 });
 
-//login buyer
+// login buyer
 router.post('/login', async(req, res) => {
     const { emailOrPhone, password } = req.body;
 
@@ -93,8 +93,8 @@ router.post('/login', async(req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
-        const token = generateToken(buyer.b_id)
-        res.cookie('user', token)
+        const token = generateToken(buyer.b_id);
+        res.cookie('user', token);
         res.json({ message: 'Login successful', buyer, token });
     } catch (error) {
         console.error('Error during buyer login:', error);
@@ -132,7 +132,6 @@ router.get('/orders', async(req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 })
-
 
 
 
