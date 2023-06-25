@@ -61,7 +61,7 @@ router.post('/payment', async(req, res) => {
         const { orderID, paymentStatus } = req.body;
         console.log(orderID)
         if (!orderID || !paymentStatus) {
-            throw "Invalid request";
+            res.status(404).json({ message: "not found" })
         };
         let updatedOrder = await Order.findOneAndUpdate({ orderID }, { paymentStatus }, { new: true })
         res.json({ message: 'Payment successful', updatedOrder });
