@@ -5,6 +5,8 @@ const Item = require('../models/ItemListing')
 const bcrypt = require('bcrypt');
 const router = new express.Router();
 const { generateToken } = require('../helper/generateToken');
+const Order = require('../models/orderSchema');
+const { authenticateToken } = require('../middlewares/authenticateToken');
 
 
 router.post('/registration', async(req, res) => {
@@ -18,6 +20,8 @@ router.post('/registration', async(req, res) => {
         });
 
         const createdUser = await buyer.save();
+        const token = generateToken(createdUser.b_id)
+        res.cookie('user', token)
         res.status(201).json({ message: 'Step 1: Registration completed successfully as a Buyer', b_id: createdUser.b_id });
     } catch (error) {
         console.error('Error creating Buyer', error);
@@ -26,9 +30,9 @@ router.post('/registration', async(req, res) => {
 });
 
 // Update a Buyer - Step 2: Additional Details
-router.put('/details/:bId', async(req, res) => {
+router.put('/details', async(req, res) => {
     try {
-        const { bId } = req.params;
+        const bId = req.userId;
         const { fullName, dateOfBirth, currentAddress, establishmentYear, billingAddress } = req.body;
         const buyer = await Buyer.findOne({ b_id: bId });
 
@@ -109,13 +113,26 @@ router.get('/items', async(req, res) => {
                 { schedulePublishDate: { $exists: false } },
                 { schedulePublishDate: "" }
             ],
-            totalStock: { $gt: 0 }
+            totalStock: { $gt: 0 },
+            isDraft: false
         });
         res.json(items);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch items.' });
     }
 });
+router.get('/orders', async(req, res) => {
+    const { userId } = req;
+    try {
+        const orders = await Order.find({ buyerID: userId, status: { $ne: null } });
+        res.json(orders);
+
+    } catch (error) {
+        console.error('Error retrieving orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
+
 
 
 

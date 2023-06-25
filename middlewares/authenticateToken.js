@@ -3,11 +3,15 @@ require('dotenv').config();
 
 const authenticateToken = (req, res, next) => {
     // const token = req.headers.authorization.split(' ')[1];
+    if (req.path === '/login' || req.path === '/registration') {
+        return next();
+    }
     const token = req.cookies.user
-
     if (!token) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
+
+
 
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);

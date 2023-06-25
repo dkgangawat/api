@@ -4,7 +4,7 @@ const Item = require('../models/ItemListing');
 const { authenticateToken } = require('../middlewares/authenticateToken');
 
 // Create a new item
-router.post('/', authenticateToken, async(req, res) => {
+router.post('/', async(req, res) => {
     try {
         const seller = req.userId
         const { itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, isDraft } = req.body

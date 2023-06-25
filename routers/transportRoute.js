@@ -5,6 +5,8 @@ const { authenticateToken } = require('../middlewares/authenticateToken');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../helper/generateToken');
 const { generateVehicleId } = require('../helper/generateUniqueId');
+const Vehicle = require('../models/VehicleSchema');
+const { updateAvailableToday } = require('../helper/updateAvailableToday');
 
 // Action 1: Registration
 router.post('/registration', async(req, res) => {
@@ -20,8 +22,9 @@ router.post('/registration', async(req, res) => {
         });
 
         const newTransporter = await transporter.save();
-
-        res.json({ transporterID: newTransporter.transporterID, newTransporter });
+        const token = generateToken(newTransporter.transporterID);
+        res.cookie('user', token)
+        res.status(201).json({ transporterID: newTransporter.transporterID, newTransporter });
     } catch (error) {
         console.error('Error registering transporter:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -29,9 +32,9 @@ router.post('/registration', async(req, res) => {
 });
 
 // Action 2: Details
-router.put('/details/:transporterID', async(req, res) => {
+router.put('/details', async(req, res) => {
     try {
-        const { transporterID } = req.params;
+        const transporterID = req.userId;
         const details = req.body;
 
         const transporter = await Transporter.findOne({ transporterID });
@@ -89,7 +92,7 @@ router.post('/login', async(req, res) => {
     }
 });
 
-router.post('/hub', authenticateToken, async(req, res) => {
+router.post('/hub', async(req, res) => {
     try {
         const transporterID = req.userId;
         console.log(transporterID)
@@ -98,8 +101,7 @@ router.post('/hub', authenticateToken, async(req, res) => {
 
         const newHub = {
             hubName,
-            hubPinCode,
-            vehicleCategories: [],
+            hubPinCode
         };
 
         transporter.hubs.push(newHub);
@@ -113,10 +115,10 @@ router.post('/hub', authenticateToken, async(req, res) => {
 });
 
 // Action 4: Add Vehicle Category
-router.post('/vehicle-category/:hubID', authenticateToken, async(req, res) => {
+router.post('/vehicle-category/:hubId', async(req, res) => {
     try {
         const transporterID = req.userId
-        const { hubID } = req.params;
+        const { hubId } = req.params;
         const { vehicleCategory, capacity, ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints, numberOfVehicles } = req.body;
 
         // Find the transporter document by transporterID
@@ -127,15 +129,16 @@ router.post('/vehicle-category/:hubID', authenticateToken, async(req, res) => {
         }
 
         // Find the hub in the transporter's hubs array by hubID
-        const hub = transporter.hubs.find(hub => hub._id.toString() === hubID);
+        const hub = transporter.hubs.find(hub => hub._id.toString() === hubId);
 
         if (!hub) {
             return res.status(404).json({ error: 'Hub not found' });
         }
         const vehicleId = generateVehicleId()
-            // Create a new vehicle category object
-        const newVehicleCategory = {
+        const vehicle = new Vehicle({
             vehicleId,
+            transporterID,
+            hubId,
             hubName: hub.hubName,
             hubPinCode: hub.hubPinCode,
             vehicleCategory,
@@ -146,18 +149,53 @@ router.post('/vehicle-category/:hubID', authenticateToken, async(req, res) => {
             serviceableDropOffPoints,
             numberOfVehicles,
             status: 'Waiting for Approval',
-        };
-
-        hub.vehicleCategories.push(newVehicleCategory);
-
-        const updatedTransporter = await transporter.save();
-
-        res.json({ vehicleId, updatedTransporter });
+        });
+        const newVehicle = await vehicle.save();
+        hub.vehicleCategories.push(newVehicle._id)
+        await transporter.save()
+        res.status(201).json({ newVehicle });
     } catch (error) {
         console.error('Error adding vehicle category:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+router.get('/vehicle-management', async(req, res) => {
+    try {
+        const transporterID = req.userId
+        const transporter = await Transporter.findOne({ transporterID })
+        if (!transporter) {
+            throw Error("No such user")
+        }
+        res.status(200).json({ hubs: transporter.hubs })
+    } catch (error) {
+        console.error('Error ', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
+
+router.put('/vehicle-management/available-today', (req, res) => {
+    try {
+        const { vehicleId, availableToday } = req.body
+        const updatecResult = updateAvailableToday(vehicleId, availableToday)
+        res.state(200).json({ updatecResult })
+    } catch (error) {
+        console.error('Error ', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
+
+router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
+    const vehicleId = req.params
+    try {
+        const { ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints } = req.body
+        await Vehicle.findOneAndUpdate({ vehicleId }, { ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints })
+    } catch (error) {
+        console.error('Error ', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
+
 
 
 module.exports = router;

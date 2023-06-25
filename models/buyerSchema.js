@@ -33,6 +33,10 @@ const buyerSchema = new mongoose.Schema({
     establishmentYear: String,
     billingAddress: String,
     currentAddress: String,
+    draft: {
+        type: Boolean,
+        default: true,
+    }
 });
 
 // generating a buyer id

@@ -3,12 +3,11 @@ const express = require('express');
 const Seller = require('../models/seller');
 const bcrypt = require('bcrypt');
 const router = new express.Router();
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET_KEY } = require('../config/config');
-const { authenticateToken } = require('../middlewares/authenticateToken');
 const item = require('../models/ItemListing');
 const Order = require('../models/orderSchema');
 const { generateToken } = require('../helper/generateToken');
+const { updateOrderStatus } = require('../helper/updateOrderStatus');
+const { updateTotalStocks } = require('../helper/updateTotalStocks');
 
 
 router.post('/registration', async(req, res) => {
@@ -23,7 +22,9 @@ router.post('/registration', async(req, res) => {
         });
 
         const createdUser = await seller.save();
-        // res.redirect(`/seller-details/${createdUser._id}`)
+        const token = generateToken(createdUser.s_id);
+        res.cookie('user', token)
+            // res.redirect(`/seller-details/${createdUser._id}`)
         res.status(201).json({ message: 'Step 1: Registration completed successfully', s_id: createdUser.s_id });
         // res.status(302).send(`<html><body><p> Redirecting to <a href=${`/seller-details/${}`}></a> </p></body></html>`)
     } catch (error) {
@@ -33,12 +34,13 @@ router.post('/registration', async(req, res) => {
 });
 
 // Update a seller - Step 2: Additional Details
-router.put('/details/:sId', async(req, res) => {
+router.put('/details', async(req, res) => {
     try {
-        const { sId } = req.params;
+        const sId = req.userId;
+        console.log(sId)
         const { fullName, dateOfBirth, currentAddress, addressProof, bankDetails, escrowTermsAccepted, sellerVerificationDocuments, highestQualification, draft } = req.body;
         const seller = await Seller.findOne({ s_id: sId });
-
+        console.log(seller)
         if (!seller) {
             return res.status(404).json({ error: 'Seller not found' });
         }
@@ -110,7 +112,7 @@ router.post('/login', async(req, res) => {
 });
 
 // item management
-router.get('/item-management', authenticateToken, async(req, res) => {
+router.get('/item-management', async(req, res) => {
     const { userId } = req;
     console.log(userId);
     try {
@@ -122,10 +124,21 @@ router.get('/item-management', authenticateToken, async(req, res) => {
     }
 });
 
-router.get('/orders/:status', authenticateToken, async(req, res) => {
+router.get('/orders', async(req, res) => {
+    const { userId } = req;
+    try {
+        const orders = await Order.find({ sellerID: userId, status: { $ne: null }, paymentStatus: 'completed' }).populate('itemRef');
+        res.json(orders);
+
+    } catch (error) {
+        console.error('Error retrieving orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
+
+router.get('/orders/:status', async(req, res) => {
     const { status } = req.params;
     const { userId } = req;
-
     try {
         let sellerVerifiedStatus;
 
@@ -140,8 +153,7 @@ router.get('/orders/:status', authenticateToken, async(req, res) => {
         } else {
             return res.status(400).json({ message: 'Invalid status' });
         }
-
-        const orders = await Order.find({ sellerID: userId, sellerVerified: sellerVerifiedStatus, paymentStatus: 'completed' });
+        const orders = await Order.find({ sellerID: userId, sellerVerified: sellerVerifiedStatus, paymentStatus: 'completed' }).populate('itemRef');
         res.json(orders);
     } catch (error) {
         console.error('Error retrieving orders:', error);
@@ -149,18 +161,28 @@ router.get('/orders/:status', authenticateToken, async(req, res) => {
     }
 });
 
-router.put('/orders/:orderId', authenticateToken, async(req, res) => {
+router.put('/orders/:orderId', async(req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
 
     try {
-        const order = await Order.findOneAndUpdate({ orderID: orderId }, { sellerVerified: status }, { new: true });
+        if (status === "accept") {
+            const responce = await updateOrderStatus(orderId, "Ready for pickup", 'accept')
+            if (!responce.success) {
+                return res.status(404).json({ message: "order not found" })
 
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
+            }
+        } else {
+            const responce = await updateOrderStatus(orderId, "Item Canceled", 'reject')
+
+            if (!responce.success) {
+                return res.status(404).json({ message: "order not found" })
+
+            }
         }
+        (status === "accept") ? await updateTotalStocks(orderId): ''
 
-        res.json({ message: 'Order status updated successfully', order });
+        res.status(200).json({ message: `Order ${status}` });
     } catch (error) {
         console.error('Error updating order status:', error);
         res.status(500).json({ error: 'Internal server error' });

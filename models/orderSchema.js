@@ -18,29 +18,43 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    transporterID: {
+        type: String
+    },
+
     itemID: {
         type: String,
+        required: true,
+    },
+    itemRef: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Item',
         required: true,
     },
     orderSize: {
         type: Number,
         required: true,
     },
-    sellerVarifide: {
-        type: Boolean,
+    sellerVerified: {
+        type: String,
         default: "pending",
         enum: ['pending', 'accept', 'reject', 'fullfilled']
     },
     paymentStatus: {
         type: String,
-        enum: ['null', 'initiated', 'completed'],
+        enum: ['null', 'initiated', 'completed', 'failed'],
         default: 'null',
+    },
+    status: {
+        type: String,
+        default: null
     },
     wantShipping: {
         type: Boolean,
     },
     dropoffLocation: {
         type: String,
+
     },
     productCost: {
         type: Number,
@@ -55,9 +69,11 @@ const orderSchema = new mongoose.Schema({
         required: true,
     },
 
-});
+
+}, { timestamps: true });
 orderSchema.pre('save', async function(next) {
     if (this.isNew) {
+        console.log(this.buyerState)
         this.orderID = generateOrderID(this.buyerState);
     }
     next();

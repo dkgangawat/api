@@ -9,6 +9,7 @@ const transporterSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: true,
+        unique: true,
         match: [/^\d{10}$/, 'Phone number should be 10 digits'],
     },
     email: {
@@ -68,31 +69,17 @@ const transporterSchema = new mongoose.Schema({
         },
         acceptTerms: Boolean,
     },
-    hubs: [{
-        hubName: String,
-        hubPinCode: String,
-        vehicleCategories: [{
-            vehicleId: {
-                type: String,
-                required: true,
-                unique: true
-            },
+    hubs: {
+        type: [{
             hubName: String,
             hubPinCode: String,
-            vehicleCategory: String,
-            capacity: Number,
-            ratePerKm: Number,
-            loadingCharges: Number,
-            serviceablePickupPoints: [String],
-            serviceableDropOffPoints: [String],
-            noOfVehicles: Number,
-            status: {
-                type: String,
-                enum: ['Waiting for Approval', 'Approved'],
-                default: 'Waiting for Approval'
-            }
+            vehicleCategories: [{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Vehicle'
+            }],
         }],
-    }],
+        default: []
+    },
 });
 
 transporterSchema.pre('save', async function(next) {
@@ -105,6 +92,10 @@ transporterSchema.pre('save', async function(next) {
             console.log(this.transporterID)
         }
     }
+    next();
+});
+transporterSchema.pre('findOne', function(next) {
+    this.populate('hubs.vehicleCategories');
     next();
 });
 const Transporter = mongoose.model('Transporter', transporterSchema);
