@@ -4,7 +4,7 @@ const Transporter = require('../models/transporterSchema');
 const { authenticateToken } = require('../middlewares/authenticateToken');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../helper/generateToken');
-const { generateVehicleId } = require('../helper/generateUniqueId');
+const { generateVehicleId, generateHubId } = require('../helper/generateUniqueId');
 const Vehicle = require('../models/VehicleSchema');
 const { updateAvailableToday } = require('../helper/updateAvailableToday');
 
@@ -48,9 +48,9 @@ router.put('/details', async(req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-router.get('/specific/:transporterID', async(req, res) => {
+router.get('/specific', async(req, res) => {
     try {
-        const { transporterID } = req.params;
+        const transporterID = req.userId;
 
         const transporter = await Transporter.findOne({ transporterID });
 
@@ -98,16 +98,17 @@ router.post('/hub', async(req, res) => {
         console.log(transporterID)
         const { hubName, hubPinCode } = req.body;
         const transporter = await Transporter.findOne({ transporterID });
-
+        const hubId = generateHubId(transporterID, hubPinCode)
         const newHub = {
             hubName,
-            hubPinCode
+            hubPinCode,
+            hubId
         };
 
         transporter.hubs.push(newHub);
         const updatedTransporter = await transporter.save();
 
-        res.json({ transporterID: updatedTransporter.transporterID });
+        res.json({ transporterID: updatedTransporter.transporterID, newHub });
     } catch (error) {
         console.error('Error adding hub:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -129,7 +130,7 @@ router.post('/vehicle-category/:hubId', async(req, res) => {
         }
 
         // Find the hub in the transporter's hubs array by hubID
-        const hub = transporter.hubs.find(hub => hub._id.toString() === hubId);
+        const hub = transporter.hubs.find(hub => hub.hubId === hubId);
 
         if (!hub) {
             return res.status(404).json({ error: 'Hub not found' });
@@ -188,6 +189,11 @@ router.put('/vehicle-management/available-today', (req, res) => {
 router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
     const vehicleId = req.params
     try {
+        const transporterID = req.userId
+        const vehicle = await Vehicle.findOne({ vehicleId })
+        if (transporterID !== vehicle.transporterID) {
+            return res.status(404).json({ message: "vehicel not found" })
+        }
         const { ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints } = req.body
         await Vehicle.findOneAndUpdate({ vehicleId }, { ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints })
     } catch (error) {

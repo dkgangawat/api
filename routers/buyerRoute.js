@@ -56,9 +56,9 @@ router.put('/details', async(req, res) => {
 });
 
 // Get a buyer by ID for admin use
-router.get('/specific/:bId', async(req, res) => {
+router.get('/specific', async(req, res) => {
     try {
-        const { bId } = req.params;
+        const bId = req.userId;
 
         const buyer = await Buyer.findOne({ b_id: bId });
 

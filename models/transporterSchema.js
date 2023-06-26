@@ -73,6 +73,7 @@ const transporterSchema = new mongoose.Schema({
         type: [{
             hubName: String,
             hubPinCode: String,
+            hubId: String,
             vehicleCategories: [{
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Vehicle'

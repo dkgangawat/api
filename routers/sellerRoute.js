@@ -65,10 +65,9 @@ router.put('/details', async(req, res) => {
 });
 
 // Get a seller by ID for admin use
-router.get('/specific/:sId', async(req, res) => {
+router.get('/specific', async(req, res) => {
     try {
-        const { sId } = req.params;
-
+        const sId = req.userId;
         const seller = await Seller.findOne({ s_id: sId });
 
         if (!seller) {
@@ -116,7 +115,7 @@ router.get('/item-management', async(req, res) => {
     const { userId } = req;
     console.log(userId);
     try {
-        const items = await item.find({ seller: userId });
+        const items = await item.find({ seller: userId, isDraft: false });
         res.json(items);
     } catch (error) {
         console.error('Error retrieving items:', error);
@@ -166,6 +165,11 @@ router.put('/orders/:orderId', async(req, res) => {
     const { status } = req.body;
 
     try {
+        const order = await Order.findOne({ orderID: orderId })
+        const sellerId = req.userId
+        if (order.sellerID !== sellerId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
         if (status === "accept") {
             const responce = await updateOrderStatus(orderId, "Ready for pickup", 'accept')
             if (!responce.success) {
