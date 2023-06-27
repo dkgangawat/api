@@ -3,6 +3,7 @@ const router = new express.Router();
 const Item = require('../models/ItemListing');
 const Order = require('../models/orderSchema');
 const Buyer = require('../models/buyerSchema');
+const { updateOrderStatus } = require('../helper/updateOrderStatus');
 router.post('/', async(req, res) => {
     try {
         const { itemID, orderSize, wantShipping, dropoffLocation } = req.body;
@@ -64,6 +65,7 @@ router.post('/payment', async(req, res) => {
             res.status(404).json({ message: "not found" })
         };
         let updatedOrder = await Order.findOneAndUpdate({ orderID }, { paymentStatus }, { new: true })
+        await updateOrderStatus(orderID, "Waiting for seller")
         res.json({ message: 'Payment successful', updatedOrder });
     } catch (error) {
         console.error(error);

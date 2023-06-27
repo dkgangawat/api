@@ -1,8 +1,9 @@
 const express = require('express');
 const router = new express.Router();
 const Item = require('../models/ItemListing');
-const { authenticateToken } = require('../middlewares/authenticateToken');
 const Seller = require('../models/seller');
+const AgriJodVerificationRequest = require('../models/agriJodVerificationRequestSchema');
+const { generateAgriJodVerificationId } = require('../helper/generateUniqueId');
 
 // Create a new item
 router.post('/', async(req, res) => {
@@ -75,6 +76,34 @@ router.get('/:itemID', async(req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+router.post('/agrijod-verification/request/:itemId', async(req, res) => {
+    const { itemId } = req.params;
+    const { userId } = req;
+    const { certification, itemImages, comments } = req.body;
+
+    try {
+        const item = await Item.findOne({ itemID: itemId, seller: userId });
+        const seller = await Seller.findOne({ s_id: userId })
+        if (!item) {
+            return res.status(404).json({ error: 'Item not found or does not belong to the seller' });
+        }
+        const verificationRequest = new AgriJodVerificationRequest({
+            seller: seller._id,
+            item: item._id,
+            certification,
+            itemImages,
+            comments,
+            requestId: generateAgriJodVerificationId()
+        });
+        await verificationRequest.save();
+
+        res.json({ message: 'AgriJod verification request submitted successfully' });
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 
 //
 

@@ -38,7 +38,7 @@ const orderSchema = new mongoose.Schema({
     sellerVerified: {
         type: String,
         default: "pending",
-        enum: ['pending', 'accept', 'reject', 'fullfilled']
+        enum: ['pending', 'accept', 'reject']
     },
     paymentStatus: {
         type: String,
@@ -68,6 +68,10 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    invoice: {
+        type: String
+    },
+    fulfilled: [String]
 
 
 }, { timestamps: true });

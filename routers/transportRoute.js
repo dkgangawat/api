@@ -187,21 +187,63 @@ router.put('/vehicle-management/available-today', (req, res) => {
 })
 
 router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
-    const vehicleId = req.params
+    const { vehicleId } = req.params;
+    const { ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints } = req.body;
+
     try {
-        const transporterID = req.userId
-        const vehicle = await Vehicle.findOne({ vehicleId })
-        if (transporterID !== vehicle.transporterID) {
-            return res.status(404).json({ message: "vehicel not found" })
+        const transporterID = req.userId;
+        const vehicle = await Vehicle.findOne({ vehicleId });
+
+        if (!vehicle || transporterID !== vehicle.transporterID) {
+            return res.status(404).json({ message: 'Vehicle not found' });
         }
-        const { ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints } = req.body
-        await Vehicle.findOneAndUpdate({ vehicleId }, { ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints })
+
+        vehicle.ratePerKm = ratePerKm;
+        vehicle.loadingCharges = loadingCharges;
+        vehicle.serviceablePickupPoints = serviceablePickupPoints;
+        vehicle.serviceableDropOffPoints = serviceableDropOffPoints;
+
+        await vehicle.save();
+
+        res.status(200).json({ message: 'Vehicle updated successfully' });
     } catch (error) {
-        console.error('Error ', error);
+        console.error('Error: ', error);
         res.status(500).json({ error: 'Internal server error' });
     }
-})
+});
 
+router.delete('/vehicle-management/update/:vehicleId/delete', async(req, res) => {
+    const vehicleId = req.params.vehicleId;
+
+    try {
+        const transporterID = req.userId;
+        const transporter = await Transporter.findOne({ transporterID });
+        const v = await Vehicle.findOne({ vehicleId })
+        if (!v || transporterID !== v.transporterID) {
+            return res.status(404).json({ message: "vehicel not found" })
+        }
+        if (!transporter) {
+            return res.status(404).json('transporterID not found');
+        }
+
+        const deleteVehicle = await Vehicle.findOneAndRemove({ vehicleId });
+
+        transporter.hubs.forEach((hub) => {
+            hub.vehicleCategories.forEach((vehicle, index) => {
+                if (vehicle.equals(deleteVehicle._id)) {
+                    hub.vehicleCategories.splice(index, 1);
+                }
+            });
+        });
+
+        await transporter.save();
+
+        res.status(200).json({ deleteVehicle });
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 
 module.exports = router;

@@ -139,23 +139,30 @@ router.get('/orders/:status', async(req, res) => {
     const { status } = req.params;
     const { userId } = req;
     try {
-        let sellerVerifiedStatus;
 
         if (status === 'pending') {
-            sellerVerifiedStatus = 'pending';
-        } else if (status === 'accepted') {
-            sellerVerifiedStatus = 'accept';
-        } else if (status === 'rejected') {
-            sellerVerifiedStatus = 'reject';
+            const orders = await Order.find({ sellerID: userId, status: { $ne: null }, paymentStatus: 'completed' }).populate('itemRef');
+            return res.json(orders);
         } else if (status === 'fulfilled') {
-            sellerVerifiedStatus = 'fulfilled';
+            const orders = await Order.find({ sellerID: userId, status: 'fulfilled', paymentStatus: 'completed' }).populate('itemRef');
+            res.json(orders);
         } else {
             return res.status(400).json({ message: 'Invalid status' });
         }
-        const orders = await Order.find({ sellerID: userId, sellerVerified: sellerVerifiedStatus, paymentStatus: 'completed' }).populate('itemRef');
-        res.json(orders);
+
     } catch (error) {
         console.error('Error retrieving orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+router.get('/notifications', async(req, res) => {
+    const userId = req.userId;
+
+    try {
+        const orders = await Order.find({ sellerID: userId, sellerVerified: 'pending', paymentStatus: 'completed' }).populate('itemRef');
+        res.json(orders);
+    } catch (error) {
+        console.error('Error: ', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -172,6 +179,9 @@ router.put('/orders/:orderId', async(req, res) => {
         }
         if (status === "accept") {
             const responce = await updateOrderStatus(orderId, "Ready for pickup", 'accept')
+            if (!responce) {
+                return res.status(200).json({ message: `order already ${status}` })
+            }
             if (!responce.success) {
                 return res.status(404).json({ message: "order not found" })
 
@@ -192,6 +202,20 @@ router.put('/orders/:orderId', async(req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+router.get('/refunds', async(req, res) => {
+    try {
+        const userId = req.userId;
+        const orders = await Order.find({ sellerID: userId, sellerVerified: 'reject', paymentStatus: 'completed' }).populate('itemRef');
+        res.json(orders);
+
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
+
+
 
 
 

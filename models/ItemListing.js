@@ -73,6 +73,10 @@ const itemSchema = new mongoose.Schema({
         required: true,
         default: true,
     },
+    agriJodVerified: {
+        type: Boolean,
+        default: false
+    }
 });
 
 // generating a item id

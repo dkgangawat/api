@@ -1,11 +1,14 @@
 const Order = require("../models/orderSchema");
 
 
-const updateOrderStatus = async(orderId, status, sellerVerified) => {
+const updateOrderStatus = async(orderId, status, sellerVerified = 'pending') => {
     try {
         const order = await Order.findOne({ orderID: orderId });
         if (!order) {
             return { success: false, error: 'Order not found' };
+        }
+        if (order.sellerVerified !== 'pending') {
+            return
         }
         order.status = status;
         order.sellerVerified = sellerVerified;

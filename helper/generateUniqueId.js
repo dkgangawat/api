@@ -35,7 +35,7 @@ const generateTransporterId = (state) => {
 
 const generateVehicleId = () => {
     const randomId = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit random number
-    return `VC-$-${ randomId }`;
+    return `VC-${ randomId }`;
 };
 
 const generateHubId = (transporterID, hubPinCode) => {
@@ -44,4 +44,9 @@ const generateHubId = (transporterID, hubPinCode) => {
     const transporterIDNumber = transporterIDArray[2];
     return `${transporterIDNumber}-${hubPinCode}`;
 }
-module.exports = { generateItemID, generateSellerID, generateBuyerID, generateOrderID, generateTransporterId, generateVehicleId, generateHubId };
+
+const generateAgriJodVerificationId = () => {
+    const randomId = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit random number
+    return `AJVR-${ randomId }`;
+}
+module.exports = { generateItemID, generateSellerID, generateBuyerID, generateOrderID, generateTransporterId, generateVehicleId, generateHubId, generateAgriJodVerificationId };

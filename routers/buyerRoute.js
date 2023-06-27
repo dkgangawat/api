@@ -121,17 +121,58 @@ router.get('/items', async(req, res) => {
         res.status(500).json({ message: 'Failed to fetch items.' });
     }
 });
-router.get('/orders', async(req, res) => {
+// router.get('/orders', async(req, res) => {
+//     const { userId } = req;
+//     try {
+//         const orders = await Order.find({ buyerID: userId, status: { $ne: null } });
+//         res.json(orders);
+
+//     } catch (error) {
+//         console.error('Error retrieving orders:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// })
+router.get('/orders/:status', async(req, res) => {
+    const { status } = req.params;
     const { userId } = req;
     try {
-        const orders = await Order.find({ buyerID: userId, status: { $ne: null } });
-        res.json(orders);
+
+        if (status === 'pending') {
+            const orders = await Order.find({ buyerID: userId, status: { $ne: null }, paymentStatus: 'completed' }).populate('itemRef');
+            return res.json(orders);
+        } else if (status === 'fulfilled') {
+            const orders = await Order.find({ buyerID: userId, status: 'fulfilled', paymentStatus: 'completed' }).populate('itemRef');
+            res.json(orders);
+        } else {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
 
     } catch (error) {
         console.error('Error retrieving orders:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
-})
+});
+
+router.post('/order/confirm-received/:orderId', async(req, res) => {
+    const { orderId } = req.params;
+    const { userId } = req;
+
+    try {
+        const { imageLink1, imageLink2 } = req.body;
+        const order = await Order.findOne({ orderID: orderId });
+        if (!order || userId !== order.buyerID) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        order.fulfilled.push(imageLink1, imageLink2);
+        order.status = 'fulfilled';
+        await order.save();
+
+        res.json({ message: 'Order received and fulfilled successfully' });
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 
 

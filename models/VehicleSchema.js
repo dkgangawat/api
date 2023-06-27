@@ -41,6 +41,9 @@ const vehicleSchema = new mongoose.Schema({
         immutable: function() {
             return !this.status === 'Approved'
         }
+    },
+    totalVcCapacity: {
+        type: Number
     }
 });
 

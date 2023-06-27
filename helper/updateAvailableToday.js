@@ -8,7 +8,8 @@ const updateAvailableToday = async(vehicleId, noOfVehicles) => {
         if (!vehicle) {
             return { success: false, error: 'vehicle not found' };
         }
-        vehicle.availableToday = noOfVehicles
+        vehicle.availableToday = noOfVehicles,
+            vehicle.totalVcCapacity = vehicle.availableToday * vehicle.capacity
         await vehicle.save();
 
         return { success: true, message: 'total vehicle Available today updated' };
