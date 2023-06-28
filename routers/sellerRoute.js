@@ -8,7 +8,7 @@ const Order = require('../models/orderSchema');
 const { generateToken } = require('../helper/generateToken');
 const { updateOrderStatus } = require('../helper/updateOrderStatus');
 const { updateTotalStocks } = require('../helper/updateTotalStocks');
-const { updateRefundStatus } = require('../helper/updaterefundStatus');
+const { updateRefundStatus } = require('../helper/updateRefundStatus');
 
 
 
