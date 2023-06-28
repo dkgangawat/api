@@ -18,6 +18,9 @@ router.post('/transport-algo', async(req, res) => {
             return res.status(404).json({ message: 'Vehicle not found' });
         }
         const algoresult = await transportAlgo(item.pinCode, orderSize, dropoffLocation)
+        if (!algoresult.efficientVehicle || !algoresult.efficientTransporter || !algoresult.numberOfvehicles) {
+            return res.status(404).json({ message: 'transporter not avilabel right now on this route' });
+        }
         transportAlgoResult = {
             transporterId: algoresult.efficientTransporter,
             vehicleId: algoresult.efficientVehicle.vehicleId,
