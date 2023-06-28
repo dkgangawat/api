@@ -8,6 +8,7 @@ const Order = require('../models/orderSchema');
 const { generateToken } = require('../helper/generateToken');
 const { updateOrderStatus } = require('../helper/updateOrderStatus');
 const { updateTotalStocks } = require('../helper/updateTotalStocks');
+const { updateRefundStatus } = require('../helper/updaterefundStatus');
 
 
 router.post('/registration', async(req, res) => {
@@ -141,7 +142,7 @@ router.get('/orders/:status', async(req, res) => {
     try {
 
         if (status === 'pending') {
-            const orders = await Order.find({ sellerID: userId, status: { $ne: null }, paymentStatus: 'completed' }).populate('itemRef');
+            const orders = await Order.find({ sellerID: userId, $and: [{ status: { $ne: null } }, { status: { $ne: 'fulfilled' } }], paymentStatus: 'completed' }).populate('itemRef');
             return res.json(orders);
         } else if (status === 'fulfilled') {
             const orders = await Order.find({ sellerID: userId, status: 'fulfilled', paymentStatus: 'completed' }).populate('itemRef');
@@ -188,8 +189,8 @@ router.put('/orders/:orderId', async(req, res) => {
             }
         } else {
             const responce = await updateOrderStatus(orderId, "Item Canceled", 'reject')
-
-            if (!responce.success) {
+            const refundStatus = await updateRefundStatus(orderId, 'processing')
+            if (!responce.success || !refundStatus) {
                 return res.status(404).json({ message: "order not found" })
 
             }

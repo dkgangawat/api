@@ -19,4 +19,13 @@ app.use('/buyer', authenticateToken, require('./routers/buyerRoute'));
 app.use('/add-to-cart', authenticateToken, require('./routers/addToCart'));
 app.use('/transporter', authenticateToken, require('./routers/transportRoute'))
 
+
+
+
+// Start the server
+app.listen(3000, () => {
+    console.log('Server started on port 3000');
+});
+
+
 module.exports = app;

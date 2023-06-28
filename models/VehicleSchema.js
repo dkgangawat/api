@@ -18,7 +18,10 @@ const vehicleSchema = new mongoose.Schema({
     vehicleCategory: String,
     capacity: Number,
     ratePerKm: Number,
-    loadingCharges: Number,
+    loadingCharges: {
+        type: Number,
+        default: 0
+    },
     serviceablePickupPoints: {
         type: [
             String
@@ -43,7 +46,8 @@ const vehicleSchema = new mongoose.Schema({
         }
     },
     totalVcCapacity: {
-        type: Number
+        type: Number,
+        default: 0
     }
 });
 

@@ -18,8 +18,13 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    transporterID: {
-        type: String
+    transporter: {
+        type: {
+            transporterId: String,
+            vehicleId: String,
+            numberOfVehicle: Number
+        },
+        default: null
     },
 
     itemID: {
@@ -71,7 +76,12 @@ const orderSchema = new mongoose.Schema({
     invoice: {
         type: String
     },
-    fulfilled: [String]
+    fulfilled: [String],
+    refundStatus: {
+        type: String,
+        enum: [null, "processing", 'completed'],
+        default: null
+    }
 
 
 }, { timestamps: true });

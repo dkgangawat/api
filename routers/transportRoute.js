@@ -7,6 +7,7 @@ const { generateToken } = require('../helper/generateToken');
 const { generateVehicleId, generateHubId } = require('../helper/generateUniqueId');
 const Vehicle = require('../models/VehicleSchema');
 const { updateAvailableToday } = require('../helper/updateAvailableToday');
+const Order = require('../models/orderSchema');
 
 // Action 1: Registration
 router.post('/registration', async(req, res) => {
@@ -179,7 +180,7 @@ router.put('/vehicle-management/available-today', (req, res) => {
     try {
         const { vehicleId, availableToday } = req.body
         const updatecResult = updateAvailableToday(vehicleId, availableToday)
-        res.state(200).json({ updatecResult })
+        res.status(200).json({ updatecResult })
     } catch (error) {
         console.error('Error ', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -245,5 +246,54 @@ router.delete('/vehicle-management/update/:vehicleId/delete', async(req, res) =>
     }
 });
 
+router.get('/orders/:status', async(req, res) => {
+    const { status } = req.params;
+    const { userId } = req;
+    try {
+
+        if (status === 'pending') {
+            const orders = await Order.find({ 'transporter.transporterId': userId, $and: [{ status: { $ne: null } }, { status: { $ne: 'fulfilled' } }], paymentStatus: 'completed' }).populate('itemRef');
+            return res.json(orders);
+        } else if (status === 'fulfilled') {
+            const orders = await Order.find({ 'transporter.transporterId': userId, status: 'fulfilled', paymentStatus: 'completed' }).populate('itemRef');
+            res.json(orders);
+        } else {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+    } catch (error) {
+        console.error('Error retrieving orders:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+router.put('/update-order-status/:orderId', async(req, res) => {
+    const { orderId } = req.params;
+    const { userId } = req;
+    const { status } = req.body;
+
+    try {
+        const order = await Order.findOne({ orderID: orderId, 'transporter.transporterId': userId });
+
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Order not found or does not belong to the transporter' });
+        }
+
+        if (order.sellerVerified !== 'pending') {
+            return res.status(400).json({ success: false, error: 'Order status cannot be updated' });
+        }
+
+        order.status = status;
+        const result = await order.save()
+
+        if (result) {
+            return res.json({ success: true, message: 'Order status updated successfully' });
+        } else {
+            return res.status(500).json({ success: false, error: 'Internal server error' });
+        }
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
 
 module.exports = router;

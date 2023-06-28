@@ -6,7 +6,6 @@ const bcrypt = require('bcrypt');
 const router = new express.Router();
 const { generateToken } = require('../helper/generateToken');
 const Order = require('../models/orderSchema');
-const { authenticateToken } = require('../middlewares/authenticateToken');
 
 
 router.post('/registration', async(req, res) => {
@@ -138,7 +137,7 @@ router.get('/orders/:status', async(req, res) => {
     try {
 
         if (status === 'pending') {
-            const orders = await Order.find({ buyerID: userId, status: { $ne: null }, paymentStatus: 'completed' }).populate('itemRef');
+            const orders = await Order.find({ buyerID: userId, status: { $ne: "fulfilled" }, $or: [{ paymentStatus: 'completed' }, { paymentStatus: 'initiated' }] }).populate('itemRef');
             return res.json(orders);
         } else if (status === 'fulfilled') {
             const orders = await Order.find({ buyerID: userId, status: 'fulfilled', paymentStatus: 'completed' }).populate('itemRef');
@@ -173,6 +172,17 @@ router.post('/order/confirm-received/:orderId', async(req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+router.get('/refunds', async(req, res) => {
+    try {
+        const userId = req.userId;
+        const orders = await Order.find({ buyerID: userId, sellerVerified: 'reject', paymentStatus: 'completed' }).populate('itemRef');
+        res.json(orders);
+
+    } catch (error) {
+        console.error('Error: ', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
 
 
 

@@ -4,6 +4,32 @@ const Item = require('../models/ItemListing');
 const Order = require('../models/orderSchema');
 const Buyer = require('../models/buyerSchema');
 const { updateOrderStatus } = require('../helper/updateOrderStatus');
+const transportAlgo = require('../helper/transportAlgo');
+const getPincodeDistance = require('../helper/getPincodeDistance');
+const Vehicle = require('../models/VehicleSchema');
+
+let transportAlgoResult;
+
+router.post('/transport-algo', async(req, res) => {
+    try {
+        const { itemID, orderSize, dropoffLocation } = req.body;
+        const item = await Item.findOne({ itemID });
+        if (!item) {
+            return res.status(404).json({ message: 'Vehicle not found' });
+        }
+        const algoresult = await transportAlgo(item.pinCode, orderSize, dropoffLocation)
+        transportAlgoResult = {
+            transporterId: algoresult.efficientTransporter,
+            vehicleId: algoresult.efficientVehicle.vehicleId,
+            numberOfVehicle: algoresult.numberOfvehicles
+        }
+        res.status(200).json({ result: algoresult });
+    } catch (error) {
+        console.error('Error executing transport algorithm:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 router.post('/', async(req, res) => {
     try {
         const { itemID, orderSize, wantShipping, dropoffLocation } = req.body;
@@ -19,10 +45,13 @@ router.post('/', async(req, res) => {
             const productCost = item.price * orderSize;
 
             // Calculate shipping cost
-            const shippingCost = 0;
+            let shippingCost = 0;
             if (wantShipping && dropoffLocation) {
-                //  shipping algorithm to calculate the shipping cost based on dropoff location
-                // shippingCost = calculateShippingCost(dropoffLocation);
+                if (!transportAlgoResult) {
+                    return res.status(404).json({ message: 'Transport algo not executed' });
+                }
+                const vehicle = await Vehicle.findOne({ vehicleId: transportAlgoResult.vehicleId })
+                shippingCost = (await getPincodeDistance(vehicle.hubPinCode, item.pinCode) + await getPincodeDistance(item.pinCode, dropoffLocation)) * vehicle.ratePerKm * transportAlgoResult.numberOfVehicle + transportAlgoResult.numberOfVehicle * vehicle.loadingCharges
             }
 
             // Calculate total cost
@@ -41,6 +70,7 @@ router.post('/', async(req, res) => {
                 productCost,
                 shippingCost,
                 totalCost,
+                transporter: transportAlgoResult,
                 paymentStatus: 'initiated'
             });
             const newOrder = await order.save();
@@ -55,6 +85,8 @@ router.post('/', async(req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+
 
 // Payment route
 router.post('/payment', async(req, res) => {
