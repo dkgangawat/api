@@ -40,29 +40,28 @@ router.put('/details', async(req, res) => {
     try {
         const sId = req.userId;
         console.log(sId)
-        const { fullName, dateOfBirth, currentAddress, addressProof, bankDetails, escrowTermsAccepted, sellerVerificationDocuments, highestQualification, draft } = req.body;
+        const updatedFields = req.body
+            // const { fullName, dateOfBirth, currentAddress, addressProof, bankDetails, escrowTermsAccepted, sellerVerificationDocuments, highestQualification, draft } = req.body;
         const seller = await Seller.findOne({ s_id: sId });
         console.log(seller)
         if (!seller) {
             return res.status(404).json({ error: 'Seller not found' });
         }
 
-        seller.fullName = fullName;
-        seller.dateOfBirth = dateOfBirth;
-        seller.currentAddress = currentAddress;
-        seller.addressProof = addressProof;
-        seller.bankDetails = bankDetails;
-        seller.escrowTermsAccepted = escrowTermsAccepted;
-        seller.sellerVerificationDocuments = sellerVerificationDocuments;
-        seller.highestQualification = highestQualification;
-        seller.draft = draft;
+        for (const field in updatedFields) {
+            if (field in seller) {
+                seller[field] = updatedFields[field];
+            } else {
+                throw new Error(` invalid field, ${field} , accepted fields are fullName, dateOfBirth, currentAddress, addressProof, bankDetails, escrowTermsAccepted, sellerVerificationDocuments, highestQualification, draft  `)
+            }
+        }
 
         await seller.save();
 
         res.status(200).json({ message: 'Step 2: Additional details completed successfully' });
     } catch (error) {
         console.error('Error updating seller', error);
-        res.status(500).json({ error: 'Failed to update seller' });
+        res.status(500).json({ error: `Failed to update seller, ${error.message}` });
     }
 });
 

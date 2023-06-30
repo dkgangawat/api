@@ -7,6 +7,7 @@ const sellerSchema = new mongoose.Schema({
     s_id: {
         type: String,
         unique: true,
+        immutable: true,
     },
     phone: {
         type: String,
@@ -23,6 +24,7 @@ const sellerSchema = new mongoose.Schema({
     state: {
         type: String,
         required: true,
+        immutable: true,
     },
     password: {
         type: String,

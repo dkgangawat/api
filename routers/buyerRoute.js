@@ -32,18 +32,21 @@ router.post('/registration', async(req, res) => {
 router.put('/details', async(req, res) => {
     try {
         const bId = req.userId;
-        const { fullName, dateOfBirth, currentAddress, establishmentYear, billingAddress } = req.body;
+        const updatedFields = req.body
+            // const { fullName, dateOfBirth, currentAddress, establishmentYear, billingAddress } = req.body;
         const buyer = await Buyer.findOne({ b_id: bId });
 
         if (!buyer) {
             return res.status(404).json({ error: 'buyer not found' });
         }
 
-        buyer.fullName = fullName;
-        buyer.dateOfBirth = dateOfBirth;
-        buyer.currentAddress = currentAddress;
-        buyer.establishmentYear = establishmentYear;
-        buyer.billingAddress = billingAddress;
+        for (const field in updatedFields) {
+            if (field in buyer) {
+                buyer[field] = updatedFields[field];
+            } else {
+                throw new Error(` invalid field, ${field} , accepted fields are fullName, dateOfBirth, currentAddress, establishmentYear, billingAddress  `)
+            }
+        }
 
         await buyer.save();
 
