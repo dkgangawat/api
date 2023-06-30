@@ -88,9 +88,9 @@ router.post('/agrijod-verification/request/:itemId', async(req, res) => {
             comments,
             requestId: generateAgriJodVerificationId()
         });
-        await verificationRequest.save();
+        const newRequest = await verificationRequest.save();
 
-        res.json({ message: 'AgriJod verification request submitted successfully' });
+        res.json({ message: 'AgriJod verification request submitted successfully', newRequest });
     } catch (error) {
         console.error('Error: ', error);
         res.status(500).json({ error: 'Internal server error' });
