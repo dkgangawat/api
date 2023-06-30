@@ -50,7 +50,7 @@ router.put('/details', async(req, res) => {
         res.status(200).json({ message: 'Step 2: Additional details completed successfully as a buyer' });
     } catch (error) {
         console.error('Error updating buyer', error);
-        res.status(500).json({ error: 'Failed to update buyer' });
+        res.status(500).json({ error: `Failed to update buyer, ${error.message}` });
     }
 });
 

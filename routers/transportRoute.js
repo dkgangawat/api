@@ -176,11 +176,11 @@ router.get('/vehicle-management', async(req, res) => {
     }
 })
 
-router.put('/vehicle-management/available-today', (req, res) => {
+router.put('/vehicle-management/available-today', async(req, res) => {
     try {
         const { vehicleId, availableToday } = req.body
-        const updatecResult = updateAvailableToday(vehicleId, availableToday)
-        res.status(200).json({ updatecResult })
+        const updatecResult = await updateAvailableToday(vehicleId, availableToday)
+        res.status(200).json(updatecResult)
     } catch (error) {
         console.error('Error ', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -189,7 +189,8 @@ router.put('/vehicle-management/available-today', (req, res) => {
 
 router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
     const { vehicleId } = req.params;
-    const { ratePerKm, loadingCharges, serviceablePickupPoints, serviceableDropOffPoints } = req.body;
+    const updatedFields = req.body;
+
 
     try {
         const transporterID = req.userId;
@@ -198,18 +199,24 @@ router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
         if (!vehicle || transporterID !== vehicle.transporterID) {
             return res.status(404).json({ message: 'Vehicle not found' });
         }
+        if (vehicle.status === 'Waiting for Approval') {
+            throw new Error('Vehicle is currently under review by the admin, please wait.... ')
+        }
+        for (const field in updatedFields) {
+            if (field in vehicle) {
+                if (field != 'status') vehicle[field] = updatedFields[field];
+            } else {
+                throw new Error(` invalid field, ${field} `)
+            }
+        }
+        vehicle.status = 'Waiting for Approval'
 
-        vehicle.ratePerKm = ratePerKm;
-        vehicle.loadingCharges = loadingCharges;
-        vehicle.serviceablePickupPoints = serviceablePickupPoints;
-        vehicle.serviceableDropOffPoints = serviceableDropOffPoints;
+        const updatedVehicle = await vehicle.save();
 
-        await vehicle.save();
-
-        res.status(200).json({ message: 'Vehicle updated successfully' });
+        res.status(200).json({ message: 'Vehicle updated successfully and request sent to Admin', updatedVehicle });
     } catch (error) {
         console.error('Error: ', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -219,8 +226,8 @@ router.delete('/vehicle-management/update/:vehicleId/delete', async(req, res) =>
     try {
         const transporterID = req.userId;
         const transporter = await Transporter.findOne({ transporterID });
-        const v = await Vehicle.findOne({ vehicleId })
-        if (!v || transporterID !== v.transporterID) {
+        const vehicel = await Vehicle.findOne({ vehicleId })
+        if (!vehicel || transporterID !== vehicel.transporterID) {
             return res.status(404).json({ message: "vehicel not found" })
         }
         if (!transporter) {
@@ -230,8 +237,8 @@ router.delete('/vehicle-management/update/:vehicleId/delete', async(req, res) =>
         const deleteVehicle = await Vehicle.findOneAndRemove({ vehicleId });
 
         transporter.hubs.forEach((hub) => {
-            hub.vehicleCategories.forEach((vehicle, index) => {
-                if (vehicle.equals(deleteVehicle._id)) {
+            hub.vehicleCategories.forEach((vehicleCategory, index) => {
+                if (vehicleCategory.equals(deleteVehicle._id)) {
                     hub.vehicleCategories.splice(index, 1);
                 }
             });

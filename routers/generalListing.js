@@ -40,23 +40,16 @@ router.put('/:itemID', async(req, res) => {
         if (!sellerExist || sellerId !== item.seller) {
             return res.status(404).json({ error: ' no item found' });
         }
-        const { itemName, itemDescription, itemFieldArea, sowingDate, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, schedulePublishDate, isDraft } = req.body
-        item.itemName = itemName;
-        item.itemDescription = itemDescription;
-        item.itemFieldArea = itemFieldArea;
-        item.sowingDate = sowingDate;
-        item.itemImages = itemImages;
-        item.bagSize = bagSize;
-        item.totalStock = totalStock;
-        item.specialRequest = specialRequest;
-        item.minOrderAmount = minOrderAmount;
-        item.price = price;
-        item.pickupAddresses = pickupAddresses;
-        item.pinCode = pinCode;
-        item.schedulePublishDate = schedulePublishDate;
-        item.isDraft = isDraft;
+        const updatedFields = req.body;
+        for (const field in updatedFields) {
+            if (field in item) {
+                item[field] = updatedFields[field];
+            } else {
+                throw new Error(` invalid field, ${field} `)
+            }
+        }
         const updatedItem = await item.save();
-        res.json(updatedItem);
+        res.status(200).json(updatedItem);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -84,8 +77,8 @@ router.post('/agrijod-verification/request/:itemId', async(req, res) => {
     try {
         const item = await Item.findOne({ itemID: itemId, seller: userId });
         const seller = await Seller.findOne({ s_id: userId })
-        if (!item) {
-            return res.status(404).json({ error: 'Item not found or does not belong to the seller' });
+        if (!item || !seller) {
+            return res.status(404).json({ error: 'either you are not a seller or item does not belong to you' });
         }
         const verificationRequest = new AgriJodVerificationRequest({
             seller: seller._id,

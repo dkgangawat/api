@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const { generateBuyerID } = require('../helper/generateUniqueId');
+const regex = require('../helper/regex');
 
 const buyerSchema = new mongoose.Schema({
     b_id: {
@@ -11,13 +12,13 @@ const buyerSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: [/^\d{10}$/, 'Phone number should be 10 digits'],
+        match: regex.phone,
     },
     email: {
         type: String,
         required: true,
         unique: true,
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email'],
+        match: regex.email,
     },
     state: {
         type: String,
@@ -29,9 +30,23 @@ const buyerSchema = new mongoose.Schema({
     },
     fullName: String,
     category: String,
-    dateOfBirth: Date,
+    daeOfBitrth: Date,
     establishmentYear: String,
     billingAddress: String,
+    bankDetails: {
+        accountNumber: {
+            type: String,
+            match: regex.bankAccountNumber,
+        },
+        ifscCode: {
+            type: String,
+            match: regex.ifscCode,
+        },
+    },
+    identity: {
+        idDocument: String,
+        idNumber: String,
+    },
     currentAddress: String,
 });
 

@@ -39,6 +39,12 @@ const orderSchema = new mongoose.Schema({
     orderSize: {
         type: Number,
         required: true,
+        validate: {
+            validator: function(value) {
+                return Number.isInteger(value) && value > 0;
+            },
+            message: 'The field must be a natural number (positive integer).',
+        }
     },
     sellerVerified: {
         type: String,

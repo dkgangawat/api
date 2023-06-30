@@ -32,7 +32,7 @@ const vehicleSchema = new mongoose.Schema({
             String
         ]
     },
-    noOfVehicles: Number,
+    numberOfVehicles: Number,
     status: {
         type: String,
         enum: ['Waiting for Approval', 'Approved'],

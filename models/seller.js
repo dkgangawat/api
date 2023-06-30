@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const { generateSellerID } = require('../helper/generateUniqueId');
+const regex = require('../helper/regex');
 
 const sellerSchema = new mongoose.Schema({
     s_id: {
@@ -38,11 +39,11 @@ const sellerSchema = new mongoose.Schema({
     bankDetails: {
         accountNumber: {
             type: String,
-            match: [/^\d{9,18}$/, 'Account number should be 9 to 18 digits'],
+            match: regex.bankAccountNumber,
         },
         ifscCode: {
             type: String,
-            match: [/^[A-Za-z]{4}\d{7}$/, 'Invalid IFSC code'],
+            match: regex.ifscCode,
         },
     },
     escrowTermsAccepted: Boolean,
