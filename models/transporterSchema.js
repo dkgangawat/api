@@ -1,22 +1,26 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const { generateTransporterId } = require('../helper/generateUniqueId');
+const regex = require('../helper/regex');
 const transporterSchema = new mongoose.Schema({
     transporterID: {
         type: String,
         unique: true,
+        index: true
     },
     phone: {
         type: String,
         required: true,
         unique: true,
-        match: [/^\d{10}$/, 'Phone number should be 10 digits'],
+        index: true,
+        match: regex.phone
     },
     email: {
         type: String,
         required: true,
         unique: true,
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email']
+        index: true,
+        match: regex.email
     },
     password: {
         type: String,
@@ -32,12 +36,7 @@ const transporterSchema = new mongoose.Schema({
         companyAddress: String,
         gstin: {
             type: String,
-            validate: {
-                validator: function(v) {
-                    return /^[A-Z0-9]{15}$/.test(v);
-                },
-                message: 'Invalid GSTIN',
-            },
+            match: regex.gstin
         },
         companyPAN: String,
         cin: String,
@@ -50,21 +49,11 @@ const transporterSchema = new mongoose.Schema({
         bankDetails: {
             accountNumber: {
                 type: String,
-                validate: {
-                    validator: function(v) {
-                        return /^\d{9,18}$/.test(v);
-                    },
-                    message: 'Invalid account number',
-                },
+                match: regex.bankAccountNumber
             },
             ifscCode: {
                 type: String,
-                validate: {
-                    validator: function(v) {
-                        return /^[A-Za-z]{4}\d{7}$/.test(v);
-                    },
-                    message: 'Invalid IFSC code',
-                },
+                match: regex.ifscCode
             },
         },
         acceptTerms: Boolean,

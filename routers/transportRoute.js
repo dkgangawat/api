@@ -28,7 +28,7 @@ router.post('/registration', async(req, res) => {
         res.status(201).json({ transporterID: newTransporter.transporterID, newTransporter });
     } catch (error) {
         console.error('Error registering transporter:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `Internal server error, ${error.message}` });
     }
 });
 
