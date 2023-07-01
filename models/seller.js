@@ -65,6 +65,10 @@ const sellerSchema = new mongoose.Schema({
         },
     },
     highestQualification: String,
+    verified: {
+        type: Boolean,
+        default: false
+    }
 });
 
 // generating a seller id

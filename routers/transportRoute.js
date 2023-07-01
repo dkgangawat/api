@@ -211,9 +211,9 @@ router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
         }
         vehicle.status = 'Waiting for Approval'
 
-        const updatedVehicle = await vehicle.save();
+        await vehicle.save();
 
-        res.status(200).json({ message: 'Vehicle updated successfully and request sent to Admin', updatedVehicle });
+        res.status(200).json({ message: 'Vehicle updated successfully and request sent to Admin' });
     } catch (error) {
         console.error('Error: ', error);
         res.status(500).json({ error: error.message });

@@ -18,7 +18,7 @@ app.use('/item', authenticateToken, require('./routers/generalListing'));
 app.use('/buyer', authenticateToken, require('./routers/buyerRoute'));
 app.use('/add-to-cart', authenticateToken, require('./routers/addToCart'));
 app.use('/transporter', authenticateToken, require('./routers/transportRoute'))
-
+app.use('/admin', require('./routers/admin/admin'))
 
 
 
