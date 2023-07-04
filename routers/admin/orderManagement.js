@@ -1,9 +1,9 @@
-const express = require('express')
-const Order = require('../../models/orderSchema')
-const Buyer = require('../../models/buyerSchema')
-const Item = require('../../models/ItemListing')
-const Seller = require('../../models/seller')
-const router = new express.Router()
+const express = require('express');
+const Order = require('../../models/orderSchema');
+const Buyer = require('../../models/buyerSchema');
+const Item = require('../../models/ItemListing');
+const Seller = require('../../models/seller');
+const router = new express.Router();
 
 router.get('/', async(req, res) => {
     try {
@@ -50,20 +50,20 @@ router.get('/', async(req, res) => {
     }
 })
 
-router.get('/:orderID/details', async(req, res) => {
-    try {
-        const { orderID } = req.params
-        const order = await Order.findOne({ orderID })
-        if (!order) {
-            throw new Error('invalid order id')
-        }
-        const buyer = await Buyer.findOne({ b_id: order.buyerID }, 'fullName phone email bankDetails billingAddress')
-        const item = await Item.findOne({ itemID: order.itemID })
-        const seller = await Seller.findOne({ s_id: item.seller }, 's_id phone email bankDetails currentAddress')
-        res.status(200).json({ buyer, item: { seller, orderSize: order.orderSize, itemID: order.itemID } })
-    } catch (error) {
-        res.status(500).json({ error: error.message })
+router.get('/:orderID/details', async (req, res) => {
+  try {
+    const {orderID} = req.params;
+    const order = await Order.findOne({orderID});
+    if (!order) {
+      throw new Error('invalid order id');
     }
-})
+    const buyer = await Buyer.findOne({b_id: order.buyerID}, 'fullName phone email bankDetails billingAddress');
+    const item = await Item.findOne({itemID: order.itemID});
+    const seller = await Seller.findOne({s_id: item.seller}, 's_id phone email bankDetails currentAddress');
+    res.status(200).json({buyer, item: {seller, orderSize: order.orderSize, itemID: order.itemID}});
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+});
 
-module.exports = router
+module.exports = router;
