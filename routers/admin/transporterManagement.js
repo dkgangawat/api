@@ -85,6 +85,7 @@ router.post('/request/:requestId/:action', async(req, res) => {
         } else {
             res.status(404).json({ message: "action must be accept or reject" })
         }
+        vehicle.status = 'Approved'
         await vehicle.save()
         await request.deleteOne()
         res.json({ message});
