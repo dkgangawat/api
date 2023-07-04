@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 
 
 const vehicleUpdateSchema = new mongoose.Schema({
+    requestId: {
+        type: String,
+        required: true,
+        unique: true,
+        immutable: true,
+    },
     vehicle: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Vehicle',

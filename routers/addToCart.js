@@ -15,7 +15,7 @@ router.post('/transport-algo', async(req, res) => {
         const { itemID, orderSize, dropoffLocation } = req.body;
         const item = await Item.findOne({ itemID });
         if (!item) {
-            return res.status(404).json({ message: 'Vehicle not found' });
+            return res.status(404).json({ message: 'item not found' });
         }
         const algoresult = await transportAlgo(item.pinCode, orderSize, dropoffLocation)
         if (!algoresult.efficientVehicle || !algoresult.efficientTransporter || !algoresult.numberOfvehicles) {
@@ -64,6 +64,7 @@ router.post('/', async(req, res) => {
             const order = new Order({
                 itemID,
                 itemRef: item._id,
+                buyerRef: buyer._id,
                 sellerID,
                 buyerID,
                 buyerState,

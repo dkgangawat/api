@@ -10,6 +10,11 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    buyerRef:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Buyer',
+        required: true,
+    },
     buyerState: {
         type: String,
         required: true,
@@ -85,7 +90,7 @@ const orderSchema = new mongoose.Schema({
     fulfilled: [String],
     refundStatus: {
         type: String,
-        enum: [null, "processing", 'completed'],
+        enum: [null, 'initiated','reversed','pending',"processing", 'completed','failed'],
         default: null
     }
 

@@ -4,10 +4,11 @@ const Transporter = require('../models/transporterSchema');
 const { authenticateToken } = require('../middlewares/authenticateToken');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../helper/generateToken');
-const { generateVehicleId, generateHubId } = require('../helper/generateUniqueId');
+const { generateVehicleId, generateHubId, generateAgriJodVerificationId } = require('../helper/generateUniqueId');
 const Vehicle = require('../models/VehicleSchema');
 const { updateAvailableToday } = require('../helper/updateAvailableToday');
 const Order = require('../models/orderSchema');
+const VehicleUpdateRequest = require('../models/vehicleUpdateRequests');
 
 // Action 1: Registration
 router.post('/registration', async(req, res) => {
@@ -200,17 +201,21 @@ router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
             return res.status(404).json({ message: 'Vehicle not found' });
         }
         if (vehicle.status === 'Waiting for Approval') {
-            throw new Error('Vehicle is currently under review by the admin, please wait.... ')
+          return res.json({message:'Vehicle is currently under review by the admin, please wait.... '})
         }
-        for (const field in updatedFields) {
-            if (field in vehicle) {
-                if (field != 'status') vehicle[field] = updatedFields[field];
-            } else {
-                throw new Error(` invalid field, ${field} `)
-            }
-        }
+        const vehicleUpdateRequest = new VehicleUpdateRequest({
+            requestId:generateAgriJodVerificationId(),
+            vehicle:vehicle._id,
+            ...updatedFields})
+        // for (const field in updatedFields) {
+        //     if (field in vehicle) {
+        //         if (field != 'status') vehicle[field] = updatedFields[field];
+        //     } else {
+        //         throw new Error(` invalid field, ${field} `)
+        //    }
+        // } 
         vehicle.status = 'Waiting for Approval'
-
+        await vehicleUpdateRequest.save()
         await vehicle.save();
 
         res.status(200).json({ message: 'Vehicle updated successfully and request sent to Admin' });

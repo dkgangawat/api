@@ -9,7 +9,6 @@ router.get('/', async(req, res) => {
     try {
         const orders = await Order.find().populate('itemRef')
         const ordersDetails = orders.map((order) => {
-            console.log(order)
             let shippingOpted = {
                 pickUpPoint: order.itemRef ? order.itemRef.pickupAddresses : '',
                 pickUpPincode: order.itemRef ? order.itemRef.pinCode : ''
@@ -18,9 +17,9 @@ router.get('/', async(req, res) => {
                 shippingOpted = {
                     ...shippingOpted,
                     shippingOpted: 'Yes',
-                    transporterID: order.transporter.transporterId,
-                    vehicleId: order.transporter.vehicleId,
-                    numberOfVehicle: order.transporter.numberOfVehicle
+                    transporterID: order.transporter?.transporterId,
+                    vehicleId: order.transporter?.vehicleId,
+                    numberOfVehicle: order.transporter?.numberOfVehicle
                 }
             } else {
                 shippingOpted = {
@@ -32,7 +31,7 @@ router.get('/', async(req, res) => {
                 productCost: order.productCost,
                 shippingCost: order.shippingCost,
             }
-            let humaraHissa = {
+            let humaraHissa = order.status==='Item Canceled'? 0:{
                 productCost: order.productCost * 0.02,
                 shippingCost: order.shippingCost * 0.01,
             }

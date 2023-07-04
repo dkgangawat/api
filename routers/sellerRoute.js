@@ -190,7 +190,7 @@ router.put('/orders/:orderId', async(req, res) => {
         } else {
             const responce = await updateOrderStatus(orderId, "Item Canceled", 'reject')
             const refundStatus = await updateRefundStatus(orderId, 'processing')
-            if (!responce.success || !refundStatus) {
+            if (!responce || !refundStatus) {
                 return res.status(404).json({ message: "order not found" })
 
             }

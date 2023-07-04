@@ -52,7 +52,7 @@ router.get('/orders/:buyerID/:status', async(req, res) => {
         res.status(200).json(orderDetails);
     } catch (error) {
         console.error('Error fetching orders:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: `'Internal server error', ${error.message}` });
     }
 });
 
