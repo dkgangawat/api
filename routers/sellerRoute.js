@@ -9,6 +9,7 @@ const {generateToken} = require('../helper/generateToken');
 const {updateOrderStatus} = require('../helper/updateOrderStatus');
 const {updateTotalStocks} = require('../helper/updateTotalStocks');
 const {updateRefundStatus} = require('../helper/updateRefundStatus');
+const {addToRefundTable} = require('../helper/addToRefundTable');
 
 
 router.post('/registration', async (req, res) => {
@@ -185,6 +186,7 @@ router.put('/orders/:orderId', async (req, res) => {
             }
         } else {
             const responce = await updateOrderStatus(orderId, "Item Canceled", 'reject')
+            await addToRefundTable(orderId)
             const refundStatus = await updateRefundStatus(orderId, 'processing')
             if (!responce || !refundStatus) {
                 return res.status(404).json({ message: "order not found" })

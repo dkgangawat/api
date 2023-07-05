@@ -88,6 +88,10 @@ const orderSchema = new mongoose.Schema({
         type: String
     },
     fulfilled: [String],
+    partialRefund: {
+        type: Boolean,
+        default: false
+        },
     refundStatus: {
         type: String,
         enum: [null, 'initiated','reversed','pending',"processing", 'completed','failed'],

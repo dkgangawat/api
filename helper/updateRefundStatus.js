@@ -1,14 +1,15 @@
-const Order = require('../models/orderSchema');
+
+const Refund = require('../models/refundSchema');
 
 
 const updateRefundStatus = async (orderId, refundStatus) => {
   try {
-    const order = await Order.findOne({orderID: orderId});
-    if (!order) {
+    const refund = await Refund.findOne({refundID: orderId});
+    if (!refund) {
       return {success: false, error: 'Order not found'};
     }
-    order.refundStatus = refundStatus;
-    await order.save();
+    refund.refundStatus = refundStatus;
+    await refund.save();
 
     return {success: true, message: 'refund status updated successfully'};
   } catch (error) {

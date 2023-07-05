@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const router = new express.Router();
 const {generateToken} = require('../helper/generateToken');
 const Order = require('../models/orderSchema');
+const Refund = require('../models/refundSchema');
 
 
 router.post('/registration', async (req, res) => {
@@ -117,7 +118,7 @@ router.get('/items', async (req, res) => {
       ],
       totalStock: {$gt: 0},
       isDraft: false,
-    });
+    }).select('-pickupAddresses');
     res.json(items);
   } catch (error) {
     res.status(500).json({message: 'Failed to fetch items.'});
@@ -138,15 +139,30 @@ router.get('/orders/:status', async (req, res) => {
   const {status} = req.params;
   const {userId} = req;
   try {
+    let orders;
     if (status === 'pending') {
-      const orders = await Order.find({buyerID: userId, status: {$ne: 'fulfilled'}, $or: [{paymentStatus: 'completed'}, {paymentStatus: 'initiated'}]}).populate('itemRef');
-      return res.json(orders);
+       orders = await Order.find({buyerID: userId, status: {$ne: 'fulfilled'}, $or: [{paymentStatus: 'completed'}, {paymentStatus: 'initiated'}]}).populate('itemRef');
+     
     } else if (status === 'fulfilled') {
-      const orders = await Order.find({buyerID: userId, status: 'fulfilled', paymentStatus: 'completed'}).populate('itemRef');
-      res.json(orders);
+      orders = await Order.find({buyerID: userId, status: 'fulfilled', paymentStatus: 'completed'}).populate('itemRef');
     } else {
       return res.status(400).json({message: 'Invalid status'});
     }
+    const orderDetails = orders.map((order)=>{
+      const {orderID, itemRef, orderSize, totalCost, paymentStatus, status, wantShipping} = order
+      let pickupPoint;
+      if(paymentStatus === 'completed' && !wantShipping && status !== 'Item Canceled'){
+        pickupPoint = itemRef?.pickupAddresses
+      }else if(wantShipping){
+        pickupPoint = 'No worries!! Agrijod is your shipping partner'
+      }else{
+        pickupPoint = 'Exact Location will be shared soon'
+      }
+      return({
+        orderID, itemName:itemRef?.itemName, quantity:orderSize, payment:totalCost, paymentStatus,pickupPoint, status
+      })
+    })
+    res.status(200).json(orderDetails)
   } catch (error) {
     console.error('Error retrieving orders:', error);
     res.status(500).json({error: 'Internal server error'});
@@ -176,7 +192,22 @@ router.post('/order/confirm-received/:orderId', async (req, res) => {
 router.get('/refunds', async (req, res) => {
   try {
     const userId = req.userId;
-    const orders = await Order.find({buyerID: userId, sellerVerified: 'reject', paymentStatus: 'completed'}).populate('itemRef');
+    const refunds = await Refund.find({buyerID: userId}).populate('order').populate({path:"order",populate: {
+      path: 'itemRef',
+      model: 'Item'
+    }})
+    const orders = refunds.map((refund)=>{
+      const {orderID, itemRef, paymentStatus, status} = refund.order
+      return({
+        orderID,
+        itemName:itemRef?.itemName,
+        refundAmount:refund.refundAmount,
+        paymentStatus,
+        orderStatus:status,
+        transactionID:refund.transactionID,
+        refundStatus: refund.refundStatus
+      })
+    })
     res.json(orders);
   } catch (error) {
     console.error('Error: ', error);

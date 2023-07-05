@@ -8,6 +8,11 @@ const vehicleUpdateSchema = new mongoose.Schema({
         unique: true,
         immutable: true,
     },
+    requestType:{
+        type: String,
+        required: true,
+        enum: ['add', 'update']
+    },
     vehicle: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Vehicle',

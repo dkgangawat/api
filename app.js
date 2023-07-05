@@ -6,6 +6,7 @@ const {authenticateToken} = require('./middlewares/authenticateToken');
 
 require('./config/db');
 require('dotenv').config();
+require('./helper/getPincodeAddress')
 app.use(cors());
 app.use(require('./routers/agrijod-actuator'));
 

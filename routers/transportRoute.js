@@ -138,7 +138,7 @@ router.post('/vehicle-category/:hubId', async (req, res) => {
       return res.status(404).json({error: 'Hub not found'});
     }
     const vehicleId = generateVehicleId();
-    const vehicle = new Vehicle({
+    const vehicleData = {
       vehicleId,
       transporterID,
       hubId,
@@ -152,8 +152,18 @@ router.post('/vehicle-category/:hubId', async (req, res) => {
       serviceableDropOffPoints,
       numberOfVehicles,
       status: 'Waiting for Approval',
-    });
+    }
+    const vehicle = new Vehicle(vehicleData);
     const newVehicle = await vehicle.save();
+    const vehicleUpdateRequest = new VehicleUpdateRequest({
+      requestId:generateAgriJodVerificationId(),
+      vehicle:newVehicle._id,
+      requestType:'add',
+      ratePerKm,
+      loadingCharges,
+      serviceablePickupPoints,
+      serviceableDropOffPoints,})
+    await vehicleUpdateRequest.save();
     hub.vehicleCategories.push(newVehicle._id);
     await transporter.save();
     res.status(201).json({newVehicle});
@@ -191,8 +201,6 @@ router.put('/vehicle-management/available-today', async (req, res) => {
 router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
   const { vehicleId } = req.params;
   const updatedFields = req.body;
-
-
   try {
       const transporterID = req.userId;
       const vehicle = await Vehicle.findOne({ vehicleId });
@@ -206,14 +214,8 @@ router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
       const vehicleUpdateRequest = new VehicleUpdateRequest({
           requestId:generateAgriJodVerificationId(),
           vehicle:vehicle._id,
+          requestType:'update',
           ...updatedFields})
-      // for (const field in updatedFields) {
-      //     if (field in vehicle) {
-      //         if (field != 'status') vehicle[field] = updatedFields[field];
-      //     } else {
-      //         throw new Error(` invalid field, ${field} `)
-      //    }
-      // } 
       vehicle.status = 'Waiting for Approval'
       await vehicleUpdateRequest.save()
       await vehicle.save();

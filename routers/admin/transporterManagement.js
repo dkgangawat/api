@@ -43,7 +43,12 @@ router.get("/requests", async (req, res) => {
       vehicleID: request.vehicle?.vehicleID,
       hubPincode: request.vehicle?.hubPinCode,
       hubId: request.vehicle?.hubId,
-      oldData: {
+      oldData: request.requestType === "add" ? {
+        serviceablePickupPoints: [],
+        serviceableDropOffPoints: [],
+        ratePerKm: null,
+        loadingCharges:null
+      } : {
         serviceablePickupPoints: request.vehicle?.serviceablePickupPoints,
         serviceableDropOffPoints: request.vehicle?.serviceableDropOffPoints,
         ratePerKm: request.vehicle?.ratePerKm,
