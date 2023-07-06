@@ -40,7 +40,7 @@ router.get("/requests", async (req, res) => {
     const requestsDetails = requests.map((request) => ({
     requestId: request.requestId,
       transporterID: request.vehicle?.transporterID,
-      vehicleID: request.vehicle?.vehicleID,
+      vehicleID: request.vehicle?.vehicleId,
       hubPincode: request.vehicle?.hubPinCode,
       hubId: request.vehicle?.hubId,
       oldData: request.requestType === "add" ? {
@@ -81,16 +81,20 @@ router.post('/request/:requestId/:action', async(req, res) => {
         let message=''
         if (action == 'reject') {
             message= 'update request rejected'
+            request.requestType === 'add'?vehicle.status = 'Request rejected':vehicle.status='Approved'
+            
         } else if (action == 'accept') {
             vehicle.serviceablePickupPoints = request.serviceablePickupPoints
             vehicle.serviceableDropOffPoints = request.serviceableDropOffPoints
             vehicle.ratePerKm = request.ratePerKm
             vehicle.loadingCharges = request.loadingCharges
             message='update request accepted'
+            vehicle.status= 'Approved'
         } else {
             res.status(404).json({ message: "action must be accept or reject" })
         }
-        vehicle.status = 'Approved'
+       
+      
         await vehicle.save()
         await request.deleteOne()
         res.json({ message});

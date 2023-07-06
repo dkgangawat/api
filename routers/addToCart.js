@@ -7,8 +7,6 @@ const { updateOrderStatus } = require("../helper/updateOrderStatus");
 const transportAlgo = require("../helper/transportAlgo");
 const getPincodeDistance = require("../helper/getPincodeDistance");
 const Vehicle = require("../models/VehicleSchema");
-const { updateRefundStatus } = require("../helper/updateRefundStatus");
-const { addToRefundTable } = require("../helper/addToRefundTable");
 const { cancelOrderIfPaymentNotCompleted } = require("../helper/cancelOrderIfPaymentNotCompleted");
 
 let transportAlgoResult;
@@ -77,13 +75,15 @@ router.post("/transport-algo", async (req, res) => {
     const algoresult = await transportAlgo(
       item.pinCode,
       orderSize,
-      dropoffLocation
+      dropoffLocation,
+      item.bagSize
     );
     if (
       !algoresult.efficientVehicle ||
       !algoresult.efficientTransporter ||
       !algoresult.numberOfvehicles
     ) {
+      transportAlgoResult= null
       return res
         .status(404)
         .json({ message: "transporter not avilabel right now on this route" });
@@ -120,7 +120,7 @@ router.post("/", async (req, res) => {
         if (!transportAlgoResult) {
           return res
             .status(404)
-            .json({ message: "Transport algo not executed" });
+            .json({ message: "Transport algo not executed or transporter not avilabel right now on this route" });
         }
         const vehicle = await Vehicle.findOne({
           vehicleId: transportAlgoResult.vehicleId,
@@ -157,6 +157,7 @@ router.post("/", async (req, res) => {
       setTimeout(async () => {
         await cancelOrderIfPaymentNotCompleted(newOrder.orderID);
       }, 8 * 60 * 60 * 1000)
+      transportAlgoResult=null
       res.json({ orderID: newOrder.orderID, newOrder });
     } else {
       res

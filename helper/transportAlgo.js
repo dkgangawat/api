@@ -1,14 +1,15 @@
 const Vehicle = require('../models/VehicleSchema');
 const getPincodeDistance = require('./getPincodeDistance');
 
-const transportAlgo = async (pickupPincodes, orderSize, dropOffPincode) => {
+const transportAlgo = async (pickupPincodes, orderSize, dropOffPincode,bagSize) => {
   try {
     const vehicles = await Vehicle.find({
       totalVcCapacity: {$gte: orderSize},
+      status:'Approved',
       serviceablePickupPoints: {$in: [pickupPincodes]},
       serviceableDropOffPoints: {$in: [dropOffPincode]},
     });
-
+console.log(vehicles)
     const numberOfVehicles = [];
 
     for (const vehicle of vehicles) {
@@ -20,7 +21,7 @@ const transportAlgo = async (pickupPincodes, orderSize, dropOffPincode) => {
       numberOfVehicles.push({
 
         vehicle,
-        noOfVehicleRequired: Math.ceil(orderSize / vehicle.capacity),
+        noOfVehicleRequired: Math.ceil((orderSize*bagSize)/ vehicle.capacity),
         distanceHubToPP,
         distancePPToDP,
       });

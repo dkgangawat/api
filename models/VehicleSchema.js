@@ -35,7 +35,7 @@ const vehicleSchema = new mongoose.Schema({
   numberOfVehicles: Number,
   status: {
     type: String,
-    enum: ['Waiting for Approval', 'Approved'],
+    enum: ['Waiting for Approval', 'Approved','Request rejected'],
     default: 'Waiting for Approval',
   },
   availableToday: {

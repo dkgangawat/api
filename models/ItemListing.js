@@ -7,7 +7,15 @@ const itemSchema = new mongoose.Schema({
     required: true,
   },
   itemDescription: String,
-  itemFieldArea: Number,
+  itemFieldArea:{
+    type: Number,
+    validate: {
+      validator: function(value) {
+          return  value >= 0;
+      },
+      message: 'bagSize field must be a  number >= 0.',
+  }
+  },
   harvestDate: {
     type: Date,
     required: true,
@@ -41,9 +49,9 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     validate: {
       validator: function(value) {
-          return  value > 0;
+          return  value >= 0;
       },
-      message: 'totalStock field must be a  number > 0.',
+      message: 'totalStock field must be a  number >= 0.',
   }
   },
   specialRequest: {
@@ -53,7 +61,7 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     validate: {
       validator: function(value) {
-          return Number.isInteger(value) && value > 0;
+          return Number.isInteger(value) && value >= 0;
       },
       message: 'minOrderAmount must be a natural number (positive integer).',
   }

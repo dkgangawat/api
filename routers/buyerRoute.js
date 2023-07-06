@@ -151,7 +151,13 @@ router.get('/orders/:status', async (req, res) => {
     const orderDetails = orders.map((order)=>{
       const {orderID, itemRef, orderSize, totalCost, paymentStatus, status, wantShipping} = order
       let pickupPoint;
-      if(paymentStatus === 'completed' && !wantShipping && status !== 'Item Canceled'){
+      if(paymentStatus === 'initiated' && wantShipping === false ){
+        pickupPoint = 'Exact Location will be shared soon'
+      }
+      else if(paymentStatus === 'completed' && wantShipping === false && status === "Item Canceled"){
+        pickupPoint = null
+      }
+      else if(paymentStatus === 'completed' && wantShipping===false && status !== 'Item Canceled'){
         pickupPoint = itemRef?.pickupAddresses
       }else if(wantShipping){
         pickupPoint = 'No worries!! Agrijod is your shipping partner'
@@ -201,7 +207,7 @@ router.get('/refunds', async (req, res) => {
       return({
         orderID,
         itemName:itemRef?.itemName,
-        refundAmount:refund.refundAmount,
+        refundAmount:refund.amountToBeRefunded,
         paymentStatus,
         orderStatus:status,
         transactionID:refund.transactionID,

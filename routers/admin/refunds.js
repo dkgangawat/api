@@ -20,12 +20,12 @@ router.get('/', async (req, res) => {
         itemID: order.itemRef?.itemID,
         itemName: order.itemRef?.itemName,
         orderSize: order.orderSize,
-        productRefundAmount:order.status === 'Item Canceled' ? refund.productRefundAmount : 0 ,
-        shippingRefundAmount:order.status === 'Item Canceled' ? refund.shippingRefundAmount:0,
+        productRefundAmount: refund.productRefundAmount,
+        shippingRefundAmount: refund.shippingRefundAmount,
         buyerID: order.buyerID,
         buyerAccountNumber: order.buyerRef?.bankDetails?.accountNumber,
         buyerIFSC: order.buyerRef?.bankDetails?.ifscCode,
-        amountToBeRefunded: order.status === 'Item Canceled' ? refund.amountToBeRefunded: 0,
+        amountToBeRefunded:refund.amountToBeRefunded,
         transactionID: refund.transactionID,
         paymentStatus: order.paymentStatus,
         orderStatus: order.status,
@@ -43,20 +43,28 @@ router.get('/', async (req, res) => {
     try {
       const { orderID } = req.params;
       const { productRefundAmount, shippingRefundAmount } = req.body;
-      
-      const refund = await Refund.findOneAndUpdate(
-        { refundID: orderID },
-        { productRefundAmount, shippingRefundAmount },
-        { new: true }
-      )
+      //check
+      const refund = await Refund.findOne({ refundID: orderID })
       if (!refund) {
         return res.status(404).json({ message: 'Refund not found' });
       }
-  
-      return res.status(200).json(refund);
+      refund.productRefundAmount = productRefundAmount,
+      refund.shippingRefundAmount = shippingRefundAmount,
+      refund.amountToBeRefunded = productRefundAmount+shippingRefundAmount
+      const updatedRefund = await refund.save()
+
+      const order = await Order.findOne({orderID})
+
+      order.productCost = order.productCost - updatedRefund.productRefundAmount
+      order.shippingCost = order.shippingCost - updatedRefund.shippingRefundAmount
+      order.totalCost = order.totalCost - updatedRefund.amountToBeRefunded
+
+      const updatedOrder = await order.save()
+      
+      return res.status(200).json({updatedOrder , updatedRefund});
     } catch (error) {
       console.error('Error updating refund:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: 'Internal server error',message:error.message });
     }
   });
   

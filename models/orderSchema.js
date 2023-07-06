@@ -75,14 +75,32 @@ const orderSchema = new mongoose.Schema({
     productCost: {
         type: Number,
         required: true,
+        validate: {
+            validator: function(value) {
+                return  value >= 0;
+            },
+            message: 'productCost field must be a positive',
+        }
     },
     shippingCost: {
         type: Number,
         default: 0,
+        validate: {
+            validator: function(value) {
+                return  value >= 0;
+            },
+            message: 'shippingCost field must be a positive',
+        }
     },
     totalCost: {
         type: Number,
         required: true,
+        validate: {
+            validator: function(value) {
+                return  value >= 0;
+            },
+            message: 'totalCost field must be a positive',
+        }
     },
     invoice: {
         type: String
