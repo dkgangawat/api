@@ -11,7 +11,7 @@ const { encodeRequest, generateSignature } = require("../helper/pay");
 const { default: axios } = require("axios");
 const Payment = require("../models/paymentSchema");
 const config = require("../config/config");
-const { generateTransectionId } = require("../helper/generateUniqueId");
+const { generateTransectionId, generateOrderID } = require("../helper/generateUniqueId");
 
 let transportAlgoResult;
 
@@ -117,7 +117,7 @@ router.post("/", async (req, res) => {
       const buyerState = buyer.state;
       // Calculate product cost
       const productCost = item.price * orderSize*item.bagSize;
-      const orderID = generateOrderId(buyerState)
+      const orderID = generateOrderID(buyerState)
       // Calculate shipping cost
       let shippingCost = 0;
       if (wantShipping && dropoffLocation) {
