@@ -49,4 +49,10 @@ const generateAgriJodVerificationId = () => {
   const randomId = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit random number
   return `AJVR-${ randomId }`;
 };
-module.exports = {generateItemID, generateSellerID, generateBuyerID, generateOrderID, generateTransporterId, generateVehicleId, generateHubId, generateAgriJodVerificationId};
+
+const generateTransectionId = () => {
+  const date = Date.now().toString();
+  const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
+  return `TXN${date}${randomString}`;
+};
+module.exports = {generateItemID, generateSellerID, generateBuyerID, generateOrderID, generateTransporterId, generateVehicleId, generateHubId, generateAgriJodVerificationId,generateTransectionId};

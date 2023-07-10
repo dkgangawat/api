@@ -1,7 +1,6 @@
 const express = require('express');
 const router = new express.Router();
 const Transporter = require('../models/transporterSchema');
-const {authenticateToken} = require('../middlewares/authenticateToken');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../helper/generateToken');
 const { generateVehicleId, generateHubId, generateAgriJodVerificationId } = require('../helper/generateUniqueId');

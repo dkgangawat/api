@@ -1,6 +1,5 @@
 const Order = require("../models/orderSchema");
 const { addToRefundTable } = require("./addToRefundTable");
-const { updateOrderStatus } = require("./updateOrderStatus");
 const { updateRefundStatus } = require("./updateRefundStatus");
 
 const cancelOrderIfPaymentNotCompleted = async (orderID) => {

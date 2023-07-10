@@ -9,22 +9,20 @@ const transportAlgo = async (pickupPincodes, orderSize, dropOffPincode,bagSize) 
       serviceablePickupPoints: {$in: [pickupPincodes]},
       serviceableDropOffPoints: {$in: [dropOffPincode]},
     });
-console.log(vehicles)
     const numberOfVehicles = [];
 
     for (const vehicle of vehicles) {
       const distanceHubToPP = await getPincodeDistance(vehicle.hubPinCode, pickupPincodes);
       const distancePPToDP = await getPincodeDistance(pickupPincodes, dropOffPincode);
-
-      console.log(distanceHubToPP, distancePPToDP);
-
-      numberOfVehicles.push({
-
+      const noOfVehicleRequired= Math.ceil((orderSize*bagSize)/ vehicle.capacity)
+      if(vehicle.availableToday>= noOfVehicleRequired){
+          numberOfVehicles.push({
         vehicle,
-        noOfVehicleRequired: Math.ceil((orderSize*bagSize)/ vehicle.capacity),
+        noOfVehicleRequired,
         distanceHubToPP,
         distancePPToDP,
       });
+      }
     }
     numberOfVehicles.sort((a, b) => {
       return ((a.distanceHubToPP + a.distancePPToDP) * a.vehicle.ratePerKm * a.noOfVehicleRequired + a.noOfVehicleRequired * a.vehicle.loadingCharges) - ((b.distanceHubToPP + b.distancePPToDP) * b.vehicle.ratePerKm * b.noOfVehicleRequired + b.noOfVehicleRequired * b.vehicle.loadingCharges);
@@ -49,7 +47,7 @@ console.log(vehicles)
     }
     return {efficientVehicle, efficientTransporter, numberOfvehicles: efficientNumberOfVehicles};
   } catch (error) {
-    console.error('Error', error);
+    throw new Error('Error in transportAlgo function: ' + error.message);
   }
 };
 

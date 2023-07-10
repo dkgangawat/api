@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const authenticateToken = (req, res, next) => {
   // const token = req.headers.authorization.split(' ')[1];
-  if (req.path === '/login' || req.path === '/registration') {
+  if (req.path === '/login' || req.path === '/registration' || req.path ==='/payment/redirect' || req.path ==='/payment/callback') {
     return next();
   }
   const token = req.cookies.user;

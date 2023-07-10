@@ -118,13 +118,13 @@ const orderSchema = new mongoose.Schema({
 
 
 }, { timestamps: true });
-orderSchema.pre('save', async function(next) {
-    if (this.isNew) {
-        console.log(this.buyerState)
-        this.orderID = generateOrderID(this.buyerState);
-    }
-    next();
-});
+// orderSchema.pre('save', async function(next) {
+//     if (this.isNew) {
+//         console.log(this.buyerState)
+//         this.orderID = generateOrderID(this.buyerState);
+//     }
+//     next();
+// });
 
 const Order = mongoose.model('Order', orderSchema);
 

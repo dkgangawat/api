@@ -3,11 +3,15 @@ const router = new express.Router();
 const Item = require("../models/ItemListing");
 const Order = require("../models/orderSchema");
 const Buyer = require("../models/buyerSchema");
-const { updateOrderStatus } = require("../helper/updateOrderStatus");
 const transportAlgo = require("../helper/transportAlgo");
 const getPincodeDistance = require("../helper/getPincodeDistance");
 const Vehicle = require("../models/VehicleSchema");
 const { cancelOrderIfPaymentNotCompleted } = require("../helper/cancelOrderIfPaymentNotCompleted");
+const { encodeRequest, generateSignature } = require("../helper/pay");
+const { default: axios } = require("axios");
+const Payment = require("../models/paymentSchema");
+const config = require("../config/config");
+const { generateTransectionId } = require("../helper/generateUniqueId");
 
 let transportAlgoResult;
 
@@ -113,7 +117,7 @@ router.post("/", async (req, res) => {
       const buyerState = buyer.state;
       // Calculate product cost
       const productCost = item.price * orderSize*item.bagSize;
-
+      const orderID = generateOrderId(buyerState)
       // Calculate shipping cost
       let shippingCost = 0;
       if (wantShipping && dropoffLocation) {
@@ -135,9 +139,39 @@ router.post("/", async (req, res) => {
 
       // Calculate total cost
       const totalCost = productCost + shippingCost;
-
+      // payment initialisation 
+      const payload = {
+        merchantId: config.MERCHANT_ID,
+        merchantTransactionId: generateTransectionId(),
+        merchantUserId: buyerID,
+        merchantOrderId: orderID,
+        amount: totalCost,
+        redirectUrl: 'http://16.170.219.8:8000/add-to-cart/payment/redirect',
+        redirectMode: 'POST',
+        callbackUrl: 'http://16.170.219.8:8000/add-to-cart/payment/callback',
+        mobileNumber: buyer.phone,
+        paymentInstrument: {
+          type: 'PAY_PAGE'
+        }
+      };
+      const base64 = encodeRequest(payload)
+      const sign = `${base64}/pg/v1/pay${config.MERCHANT_KEY}`
+      const XVerify = generateSignature(sign)+'###'+'1'
+      const options = {
+          method: 'POST',
+          url: 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay',
+          headers: {
+            accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-VERIFY': XVerify
+          },
+          data: {request: base64}
+        };
+  
+      const response = await axios.request(options);
       // Save the order details in the database
       let order = new Order({
+        orderID,
         itemID,
         itemRef: item._id,
         buyerRef: buyer._id,
@@ -158,7 +192,7 @@ router.post("/", async (req, res) => {
         await cancelOrderIfPaymentNotCompleted(newOrder.orderID);
       }, 8 * 60 * 60 * 1000)
       transportAlgoResult=null
-      res.json({ orderID: newOrder.orderID, newOrder });
+      res.json({ orderID: newOrder.orderID, newOrder,payment:response.data});
     } else {
       res
         .status(404)
@@ -176,21 +210,66 @@ router.post("/", async (req, res) => {
 // Payment route
 router.post("/payment", async (req, res) => {
   try {
-    const { orderID, paymentStatus } = req.body;
-    console.log(orderID);
-    if (!orderID || !paymentStatus) {
-      res.status(404).json({ message: "not found" });
-    }
-    const updatedOrder = await Order.findOneAndUpdate(
-      { orderID },
-      { paymentStatus },
-      { new: true }
-    );
-    await updateOrderStatus(orderID, "Waiting for seller");
-    res.json({ message: "Payment successful", updatedOrder });
+    // const { orderID, paymentStatus } = req.body;
+    // console.log(orderID);
+    // if (!orderID || !paymentStatus) {
+    //   res.status(404).json({ message: "not found" });
+    // }
+    // const updatedOrder = await Order.findOneAndUpdate(
+    //   { orderID },
+    //   { paymentStatus },
+    //   { new: true }
+    // );
+    
+    // await updateOrderStatus(orderID, "Waiting for seller");
+    // res.json({ message: "Payment successful", updatedOrder });
+    const callbackResponse = req.body;
+    console.log(callbackResponse);
+    res.status(200).json({ message: "Payment successful" ,callbackResponse});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Payment redirect route
+router.post('/payment/redirect', async (req, res) => {
+  try {
+    const data = req.body;
+    res.json(data);
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" ,message:error.message});
+  }
+})
+
+router.post('payment/callback', async (req, res) => {
+  try {
+    const callbackResponse = req.body;
+    const {merchantTransactionId,transactionId,merchantUserId,amount,mobileNumber,paymentInstrument,state,merchantOrderId} = callbackResponse.data
+    const payment = new Payment({
+      agrijodTxnID:merchantTransactionId,
+      buyerID:merchantUserId,
+      amount,
+      mobileNumber,
+      paymentInstrument,
+      txnID:transactionId,
+      txnState:state,
+      orderID:merchantOrderId,
+    });
+    await payment.save();
+    if(state==='COMPLETED'){
+      await Order.findOneAndUpdate(
+      { merchantOrderId },
+      { paymentStatus: 'completed'}
+    );
+    await updateOrderStatus(merchantOrderId, "Waiting for seller");
+    }
+    res.status(200).json({ message: 'Payment recorded successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

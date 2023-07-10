@@ -124,17 +124,7 @@ router.get('/items', async (req, res) => {
     res.status(500).json({message: 'Failed to fetch items.'});
   }
 });
-// router.get('/orders', async(req, res) => {
-//     const { userId } = req;
-//     try {
-//         const orders = await Order.find({ buyerID: userId, status: { $ne: null } });
-//         res.json(orders);
 
-//     } catch (error) {
-//         console.error('Error retrieving orders:', error);
-//         res.status(500).json({ error: 'Internal server error' });
-//     }
-// })
 router.get('/orders/:status', async (req, res) => {
   const {status} = req.params;
   const {userId} = req;
@@ -154,11 +144,8 @@ router.get('/orders/:status', async (req, res) => {
       if(paymentStatus === 'initiated' && wantShipping === false ){
         pickupPoint = 'Exact Location will be shared soon'
       }
-      else if(paymentStatus === 'completed' && wantShipping === false && status === "Item Canceled"){
+      else if(paymentStatus === 'completed'  && status === "Item Canceled"){
         pickupPoint = null
-      }
-      else if(paymentStatus === 'completed' && wantShipping===false && status !== 'Item Canceled'){
-        pickupPoint = itemRef?.pickupAddresses
       }else if(wantShipping){
         pickupPoint = 'No worries!! Agrijod is your shipping partner'
       }else{
