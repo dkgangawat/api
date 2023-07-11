@@ -103,6 +103,8 @@ dist
 # vuepress v2.x temp and cache directory
 .temp
 .cache
+temp/
+routers/temp.js
 
 # Docusaurus cache and generated files
 .docusaurus

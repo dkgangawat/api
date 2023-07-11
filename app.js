@@ -1,28 +1,29 @@
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
 const app = express();
-require("./config/db");
-require("dotenv").config();
+const cookieParser = require('cookie-parser');
+const {authenticateToken} = require('./middlewares/authenticateToken');
 
+require('./config/db');
+require('dotenv').config();
+require('./helper/getPincodeAddress')
 app.use(cors());
-// if (process.env.NODE_ENV !== "production") {
-//   require("dotenv").config({ path: "config/config.env" });
-// }
+app.use(require('./routers/agrijod-actuator'));
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
+app.use(cookieParser());
 
-const path = require("path");
+app.use('/seller', authenticateToken, require('./routers/sellerRoute'));
+app.use('/item', authenticateToken, require('./routers/generalListing'));
+app.use('/buyer', authenticateToken, require('./routers/buyerRoute'));
+app.use('/add-to-cart', authenticateToken, require('./routers/addToCart'));
+app.use('/transporter', authenticateToken, require('./routers/transportRoute'));
+app.use('/admin', require('./routers/admin/admin'));
+app.get('/', (req, res) => {
+    res.send('Welcome to AgriJod');
+});
+// app.use('/temp', require('./routers/temp'));
 
-
-app.use("/", require('./routers/sellerRoute'));
-
-
-// if (process.env.NODE_ENV === "production") {
-//   app.use(express.static("client/build"));
-//   app.get("*", (req, res) =>
-//     res.sendFile(path.resolve(__dirname, "..", "client", "build", "index.html"))
-//   );
-// }
 
 module.exports = app;
