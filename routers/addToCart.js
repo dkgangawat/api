@@ -248,6 +248,7 @@ router.post('/payment/callback', async (req, res) => {
   try {
     const response = req.body.response;
     const callbackResponse = decodeResponse(response)
+    console.log(callbackResponse)
     const {merchantTransactionId,transactionId,merchantUserId,amount,mobileNumber,paymentInstrument,state,merchantOrderId} = callbackResponse
     const payment = new Payment({
       agrijodTxnID:merchantTransactionId,
