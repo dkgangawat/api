@@ -246,8 +246,8 @@ router.post('/payment/redirect', async (req, res) => {
 
 router.post('/payment/callback', async (req, res) => {
   try {
-    const callbackResponse = req.body;
-    console.log(req.body)
+    const response = req.body.response;
+    const callbackResponse = atob(response)
     const {merchantTransactionId,transactionId,merchantUserId,amount,mobileNumber,paymentInstrument,state,merchantOrderId} = callbackResponse.data
     const payment = new Payment({
       agrijodTxnID:merchantTransactionId,
