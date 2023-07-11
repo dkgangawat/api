@@ -147,9 +147,9 @@ router.post("/", async (req, res) => {
         merchantUserId: buyerID,
         merchantOrderId: orderID,
         amount: totalCost*100,
-        redirectUrl: 'http://16.170.219.8:8000/add-to-cart/payment/redirect',
+        redirectUrl: 'https://api-aj.onrender.com/add-to-cart/payment/redirect',
         redirectMode: 'POST',
-        callbackUrl: 'http://16.170.219.8:8000/add-to-cart/payment/callback',
+        callbackUrl: 'https://api-aj.onrender.com/add-to-cart/payment/callback',
         mobileNumber: buyer.phone,
         paymentInstrument: {
           type: 'PAY_PAGE'
@@ -216,31 +216,6 @@ router.post("/", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
-  }
-});
-
-// Payment route
-router.post("/payment", async (req, res) => {
-  try {
-    // const { orderID, paymentStatus } = req.body;
-    // console.log(orderID);
-    // if (!orderID || !paymentStatus) {
-    //   res.status(404).json({ message: "not found" });
-    // }
-    // const updatedOrder = await Order.findOneAndUpdate(
-    //   { orderID },
-    //   { paymentStatus },
-    //   { new: true }
-    // );
-    
-    // await updateOrderStatus(orderID, "Waiting for seller");
-    // res.json({ message: "Payment successful", updatedOrder });
-    const callbackResponse = req.body;
-    console.log(callbackResponse);
-    res.status(200).json({ message: "Payment successful" ,callbackResponse});
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
