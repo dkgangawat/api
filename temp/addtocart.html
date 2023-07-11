@@ -86,7 +86,7 @@
       var dropoffLocation = document.getElementById('dropoffLocation').value;
 
       // Send data to Express server using fetch API
-      fetch('http://localhost:8000/add-to-cart', {
+      fetch('/add-to-cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
