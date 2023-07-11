@@ -140,19 +140,21 @@ router.get('/orders/:status', async (req, res) => {
     }
     const orderDetails = orders.map((order)=>{
       const {orderID, itemRef, orderSize, totalCost, paymentStatus, status, wantShipping} = order
-      let pickupPoint;
+      let pickupPoint  ="Exact Location will be shared soon";
+      if(wantShipping ===true){
+        pickupPoint = 'No worries!! Agrijod is your shipping partner'
+      }
       if(paymentStatus === 'initiated' && wantShipping === false ){
         pickupPoint = 'Exact Location will be shared soon'
       }
-      else if(paymentStatus === 'completed'  && status === "Item Canceled"){
+      if(wantShipping === false && paymentStatus === 'completed'){
+        pickupPoint = itemRef.pickupAddresses
+      }
+      if(status === "Item Canceled"){
         pickupPoint = null
-      }else if(wantShipping){
-        pickupPoint = 'No worries!! Agrijod is your shipping partner'
-      }else{
-        pickupPoint = 'Exact Location will be shared soon'
       }
       return({
-        orderID, itemName:itemRef?.itemName, quantity:orderSize, payment:totalCost, paymentStatus,pickupPoint, status
+        orderID, itemName:itemRef?.itemName, quantity:orderSize,wantShipping, payment:totalCost, paymentStatus,pickupPoint, status
       })
     })
     res.status(200).json(orderDetails)

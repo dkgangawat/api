@@ -114,7 +114,6 @@ router.post('/login', async (req, res) => {
 // item management
 router.get('/item-management', async (req, res) => {
   const {userId} = req;
-  console.log(userId);
   try {
     const items = await item.find({seller: userId, isDraft: false});
     res.json(items);

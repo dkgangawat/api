@@ -7,11 +7,12 @@ const transportAlgo = require("../helper/transportAlgo");
 const getPincodeDistance = require("../helper/getPincodeDistance");
 const Vehicle = require("../models/VehicleSchema");
 const { cancelOrderIfPaymentNotCompleted } = require("../helper/cancelOrderIfPaymentNotCompleted");
-const { encodeRequest, generateSignature } = require("../helper/pay");
+const { encodeRequest, generateSignature, decodeResponse } = require("../helper/pay");
 const { default: axios } = require("axios");
 const Payment = require("../models/paymentSchema");
 const config = require("../config/config");
 const { generateTransectionId, generateOrderID } = require("../helper/generateUniqueId");
+const { updateAvailableToday } = require("../helper/updateAvailableToday");
 
 let transportAlgoResult;
 
@@ -118,6 +119,7 @@ router.post("/", async (req, res) => {
       // Calculate product cost
       const productCost = item.price * orderSize*item.bagSize;
       const orderID = generateOrderID(buyerState)
+      const merchantTransactionId= generateTransectionId()
       // Calculate shipping cost
       let shippingCost = 0;
       if (wantShipping && dropoffLocation) {
@@ -129,6 +131,7 @@ router.post("/", async (req, res) => {
         const vehicle = await Vehicle.findOne({
           vehicleId: transportAlgoResult.vehicleId,
         });
+        await updateAvailableToday(vehicle.vehicleId, vehicle.availableToday - transportAlgoResult.numberOfVehicle)
         shippingCost =
           ((await getPincodeDistance(vehicle.hubPinCode, item.pinCode)) +
             (await getPincodeDistance(item.pinCode, dropoffLocation))) *
@@ -142,13 +145,13 @@ router.post("/", async (req, res) => {
       // payment initialisation 
       const payload = {
         merchantId: config.MERCHANT_ID,
-        merchantTransactionId: generateTransectionId(),
+        merchantTransactionId,
         merchantUserId: buyerID,
         merchantOrderId: orderID,
         amount: totalCost*100,
-        redirectUrl: 'https://api-aj.onrender.com/add-to-cart/payment/redirect',
+        redirectUrl: `${config.AGRIJOD_BASE_URL}/add-to-cart/payment/redirect`,
         redirectMode: 'POST',
-        callbackUrl: 'https://api-aj.onrender.com/add-to-cart/payment/callback',
+        callbackUrl: `'${config.AGRIJOD_BASE_URL}/add-to-cart/payment/callback`,
         mobileNumber: buyer.phone,
         paymentInstrument: {
           type: 'PAY_PAGE'
@@ -159,7 +162,7 @@ router.post("/", async (req, res) => {
       const XVerify = generateSignature(sign)+'###'+'1'
       const options = {
           method: 'POST',
-          url: 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay',
+          url: `${config.PHONEPE_BASE_URL}/pg/v1/pay`,
           headers: {
             accept: 'application/json',
             'Content-Type': 'application/json',
@@ -188,6 +191,17 @@ router.post("/", async (req, res) => {
         paymentStatus: "initiated",
       });
       const newOrder = await order.save();
+      const payment = new Payment(
+        {
+          buyerID:buyerID,
+          mobileNumber:buyer.phone,
+          amount:totalCost,
+          agrijodTxnID:merchantTransactionId,
+          orderID:orderID,
+          txnState:"initiated"
+        }
+      )
+      await payment.save()
       setTimeout(async () => {
         await cancelOrderIfPaymentNotCompleted(newOrder.orderID);
       }, 8 * 60 * 60 * 1000)
@@ -208,30 +222,6 @@ router.post("/", async (req, res) => {
 });
 
 // Payment route
-router.post("/payment", async (req, res) => {
-  try {
-    // const { orderID, paymentStatus } = req.body;
-    // console.log(orderID);
-    // if (!orderID || !paymentStatus) {
-    //   res.status(404).json({ message: "not found" });
-    // }
-    // const updatedOrder = await Order.findOneAndUpdate(
-    //   { orderID },
-    //   { paymentStatus },
-    //   { new: true }
-    // );
-    
-    // await updateOrderStatus(orderID, "Waiting for seller");
-    // res.json({ message: "Payment successful", updatedOrder });
-    const callbackResponse = req.body;
-    console.log(callbackResponse);
-    res.status(200).json({ message: "Payment successful" ,callbackResponse});
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
 // Payment redirect route
 router.post('/payment/redirect', async (req, res) => {
   try {
@@ -244,27 +234,28 @@ router.post('/payment/redirect', async (req, res) => {
   }
 })
 
-router.post('payment/callback', async (req, res) => {
+router.post('/payment/callback', async (req, res) => {
   try {
-    const callbackResponse = req.body;
-    const {merchantTransactionId,transactionId,merchantUserId,amount,mobileNumber,paymentInstrument,state,merchantOrderId} = callbackResponse.data
-    const payment = new Payment({
-      agrijodTxnID:merchantTransactionId,
-      buyerID:merchantUserId,
-      amount,
-      mobileNumber,
-      paymentInstrument,
-      txnID:transactionId,
-      txnState:state,
-      orderID:merchantOrderId,
-    });
-    await payment.save();
+    const response = req.body.response;
+    const callbackResponse = decodeResponse(response)
+    const {merchantTransactionId,transactionId,amount,paymentInstrument,state} = callbackResponse.data
+    const payment = await Payment.findOne({agrijodTxnID:merchantTransactionId})
+      payment.amount=amount
+      payment.paymentInstrument= paymentInstrument
+      payment.txnID=transactionId
+      payment.txnState=state
+      await payment.save();
     if(state==='COMPLETED'){
       await Order.findOneAndUpdate(
-      { merchantOrderId },
+      { orderID:payment.orderID },
       { paymentStatus: 'completed'}
     );
-    await updateOrderStatus(merchantOrderId, "Waiting for seller");
+    await updateOrderStatus(payment.orderID, "Waiting for seller");
+    }else{
+      await Order.findOneAndUpdate(
+        { orderID:payment.orderID },
+        { paymentStatus:"failed" }
+      );
     }
     res.status(200).json({ message: 'Payment recorded successfully' });
   } catch (error) {

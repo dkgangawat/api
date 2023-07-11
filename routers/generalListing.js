@@ -49,6 +49,7 @@ router.put('/:itemID', async (req, res) => {
         throw new Error(` invalid field, ${field} `);
       }
     }
+    item.postalAddress = getPincodeAddress(item.pinCode)
     const updatedItem = await item.save();
     res.status(200).json(updatedItem);
   } catch (error) {
