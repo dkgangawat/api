@@ -118,6 +118,7 @@ router.post("/", async (req, res) => {
       // Calculate product cost
       const productCost = item.price * orderSize*item.bagSize;
       const orderID = generateOrderID(buyerState)
+      const merchantTransactionId= generateTransectionId()
       // Calculate shipping cost
       let shippingCost = 0;
       if (wantShipping && dropoffLocation) {
@@ -142,13 +143,13 @@ router.post("/", async (req, res) => {
       // payment initialisation 
       const payload = {
         merchantId: config.MERCHANT_ID,
-        merchantTransactionId: generateTransectionId(),
+        merchantTransactionId,
         merchantUserId: buyerID,
         merchantOrderId: orderID,
         amount: totalCost*100,
-        redirectUrl: 'https://api-aj.onrender.com/add-to-cart/payment/redirect',
+        redirectUrl: 'http://16.170.219.8:8000/add-to-cart/payment/redirect',
         redirectMode: 'POST',
-        callbackUrl: 'https://api-aj.onrender.com/add-to-cart/payment/callback',
+        callbackUrl: 'http://16.170.219.8:8000/add-to-cart/payment/callback',
         mobileNumber: buyer.phone,
         paymentInstrument: {
           type: 'PAY_PAGE'
@@ -188,6 +189,17 @@ router.post("/", async (req, res) => {
         paymentStatus: "initiated",
       });
       const newOrder = await order.save();
+      const payment = new Payment(
+        {
+          buyerID:buyerID,
+          mobileNumber:buyer.phone,
+          amount:totalCost,
+          agrijodTxnID:merchantTransactionId,
+          orderID:orderID,
+          txnState:"initiated"
+        }
+      )
+      await payment.save()
       setTimeout(async () => {
         await cancelOrderIfPaymentNotCompleted(newOrder.orderID);
       }, 8 * 60 * 60 * 1000)
@@ -248,25 +260,19 @@ router.post('/payment/callback', async (req, res) => {
   try {
     const response = req.body.response;
     const callbackResponse = decodeResponse(response)
-    console.log(callbackResponse)
-    const {merchantTransactionId,transactionId,merchantUserId,amount,mobileNumber,paymentInstrument,state,merchantOrderId} = callbackResponse
-    const payment = new Payment({
-      agrijodTxnID:merchantTransactionId,
-      buyerID:merchantUserId,
-      amount,
-      mobileNumber,
-      paymentInstrument,
-      txnID:transactionId,
-      txnState:state,
-      orderID:merchantOrderId,
-    });
-    await payment.save();
+    const {merchantTransactionId,transactionId,amount,paymentInstrument,state} = callbackResponse.data
+    const payment = await Payment.findOne({agrijodTxnID:merchantTransactionId})
+      payment.amount=amount
+      payment.paymentInstrument= paymentInstrument
+      payment.txnID=transactionId
+      payment.txnState=state
+      await payment.save();
     if(state==='COMPLETED'){
       await Order.findOneAndUpdate(
-      { merchantOrderId },
+      { orderID:payment.orderID },
       { paymentStatus: 'completed'}
     );
-    await updateOrderStatus(merchantOrderId, "Waiting for seller");
+    await updateOrderStatus(payment.orderID, "Waiting for seller");
     }
     res.status(200).json({ message: 'Payment recorded successfully' });
   } catch (error) {
