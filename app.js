@@ -23,6 +23,7 @@ app.use('/admin', require('./routers/admin/admin'));
 app.get('/', (req, res) => {
     res.send('Welcome to AgriJod');
 });
+app.use('/temp', require('./routers/temp'));
 
 
 module.exports = app;

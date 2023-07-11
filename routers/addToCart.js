@@ -145,7 +145,7 @@ router.post("/", async (req, res) => {
         merchantTransactionId: generateTransectionId(),
         merchantUserId: buyerID,
         merchantOrderId: orderID,
-        amount: totalCost,
+        amount: totalCost*100,
         redirectUrl: 'http://16.170.219.8:8000/add-to-cart/payment/redirect',
         redirectMode: 'POST',
         callbackUrl: 'http://16.170.219.8:8000/add-to-cart/payment/callback',
