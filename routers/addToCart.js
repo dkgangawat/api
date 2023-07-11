@@ -146,9 +146,9 @@ router.post("/", async (req, res) => {
         merchantUserId: buyerID,
         merchantOrderId: orderID,
         amount: totalCost*100,
-        redirectUrl: 'http://16.170.219.8:8000/add-to-cart/payment/redirect',
+        redirectUrl: 'https://api-aj.onrender.com/add-to-cart/payment/redirect',
         redirectMode: 'POST',
-        callbackUrl: 'http://16.170.219.8:8000/add-to-cart/payment/callback',
+        callbackUrl: 'https://api-aj.onrender.com/add-to-cart/payment/callback',
         mobileNumber: buyer.phone,
         paymentInstrument: {
           type: 'PAY_PAGE'
