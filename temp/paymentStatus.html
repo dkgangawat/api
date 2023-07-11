@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Status Page</title>
+  <!-- Add your CSS styles here -->
+  <style>
+    /* Your custom CSS styles */
+  </style>
+</head>
+<body>
+  <!-- Add your page content here -->
+  <h1>Payment Status Page</h1>
+
+  <div id="paymentDetails">
+    <!-- Payment details will be dynamically inserted here -->
+  </div>
+
+  <script>
+    // Get the payment details from the query parameters
+    const queryParams = new URLSearchParams(window.location.search);
+    const paymentData = {
+      code: queryParams.get('code'),
+      merchantId: queryParams.get('merchantId'),
+      transactionId: queryParams.get('transactionId'),
+      amount: queryParams.get('amount'),
+      providerReferenceId: queryParams.get('providerReferenceId'),
+      param1: queryParams.get('param1'),
+      param2: queryParams.get('param2'),
+      param3: queryParams.get('param3'),
+      param4: queryParams.get('param4'),
+      param5: queryParams.get('param5'),
+      param6: queryParams.get('param6'),
+      param7: queryParams.get('param7'),
+      param8: queryParams.get('param8'),
+      param9: queryParams.get('param9'),
+      param10: queryParams.get('param10'),
+      param11: queryParams.get('param11'),
+      param12: queryParams.get('param12'),
+      param13: queryParams.get('param13'),
+      param14: queryParams.get('param14'),
+      param15: queryParams.get('param15'),
+      param16: queryParams.get('param16'),
+      param17: queryParams.get('param17'),
+      param18: queryParams.get('param18'),
+      param19: queryParams.get('param19'),
+      param20: queryParams.get('param20'),
+      checksum: queryParams.get('checksum')
+    };
+
+    // Display the payment details on the page
+    const paymentDetailsElement = document.getElementById('paymentDetails');
+    paymentDetailsElement.innerHTML = `
+      <h2>Payment Status: ${paymentData.code}</h2>
+      <p>Merchant ID: ${paymentData.merchantId}</p>
+      <p>Transaction ID: ${paymentData.transactionId}</p>
+      <p>Amount: ${paymentData.amount}</p>
+      <p>Provider Reference ID: ${paymentData.providerReferenceId}</p>
+      <p>Param 1: ${paymentData.param1}</p>
+      <p>Param 2: ${paymentData.param2}</p>
+      <p>Param 3: ${paymentData.param3}</p>
+      <!-- Add more parameters as needed -->
+    `;
+  </script>
+</body>
+</html>

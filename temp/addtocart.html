@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add to Cart / Payment Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .container h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Add to Cart / Payment Page</h1>
+    <form id="paymentForm">
+      <div class="form-group">
+        <label for="itemID">Item ID</label>
+        <input type="text" id="itemID" name="itemID" required>
+      </div>
+      <div class="form-group">
+        <label for="orderSize">Order Size</label>
+        <input type="number" id="orderSize" name="orderSize" required>
+      </div>
+      <div class="form-group">
+        <label for="wantShipping">Want Shipping?</label>
+        <input type="checkbox" id="wantShipping" name="wantShipping">
+      </div>
+      <div class="form-group">
+        <label for="dropoffLocation">Dropoff Location</label>
+        <input type="text" id="dropoffLocation" name="dropoffLocation">
+      </div>
+      <div class="form-group">
+        <button type="submit">Proceed to Payment</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('paymentForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var itemID = document.getElementById('itemID').value;
+      var orderSize = document.getElementById('orderSize').value;
+      var wantShipping = document.getElementById('wantShipping').checked;
+      var dropoffLocation = document.getElementById('dropoffLocation').value;
+
+      // Send data to Express server using fetch API
+      fetch('http://localhost:8000/add-to-cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ itemID: itemID, orderSize: orderSize, wantShipping: wantShipping, dropoffLocation: dropoffLocation })
+      })
+      .then(function (response) {
+        // Handle server response
+        if (response.ok) {
+          // Successful payment initiation
+          return response.json();
+        } else {
+          // Failed payment initiation
+          throw new Error('Payment initiation failed');
+        }
+      })
+      .then(function (data) {
+        // Handle payment response
+        console.log(data);
+        // Redirect to payment page or show payment details to the user
+        window.location.href = data.payment.data.instrumentResponse.redirectInfo.url;
+      })
+      .catch(function (error) {
+        // Handle error
+        console.error('Error:', error);
+        // Display error message to the user
+      });
+    });
+  </script>
+</body>
+</html>
