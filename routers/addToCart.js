@@ -7,7 +7,7 @@ const transportAlgo = require("../helper/transportAlgo");
 const getPincodeDistance = require("../helper/getPincodeDistance");
 const Vehicle = require("../models/VehicleSchema");
 const { cancelOrderIfPaymentNotCompleted } = require("../helper/cancelOrderIfPaymentNotCompleted");
-const { encodeRequest, generateSignature } = require("../helper/pay");
+const { encodeRequest, generateSignature, decodeResponse } = require("../helper/pay");
 const { default: axios } = require("axios");
 const Payment = require("../models/paymentSchema");
 const config = require("../config/config");
@@ -247,8 +247,8 @@ router.post('/payment/redirect', async (req, res) => {
 router.post('/payment/callback', async (req, res) => {
   try {
     const response = req.body.response;
-    const callbackResponse = atob(response)
-    const {merchantTransactionId,transactionId,merchantUserId,amount,mobileNumber,paymentInstrument,state,merchantOrderId} = callbackResponse.data
+    const callbackResponse = decodeResponse(response)
+    const {merchantTransactionId,transactionId,merchantUserId,amount,mobileNumber,paymentInstrument,state,merchantOrderId} = callbackResponse
     const payment = new Payment({
       agrijodTxnID:merchantTransactionId,
       buyerID:merchantUserId,
