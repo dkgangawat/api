@@ -89,7 +89,7 @@ router.get('/', async (req, res) => {
         "originalTransactionId": payment.txnID,
         "merchantTransactionId": payment.agrijodTxnID,
         "amount": amountToBeRefunded,
-        "callbackUrl": `config.AGRIJOD_BASE_URL/refunds/callback`
+        "callbackUrl": `${config.AGRIJOD_BASE_URL}/admin/refunds/callback`
     }
     const base64 = encodeRequest(payload)
     const sign = `${base64}/pg/v1/refund${config.MERCHANT_KEY}`
