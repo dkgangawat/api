@@ -73,7 +73,7 @@ router.get('/', async (req, res) => {
   });
   
   
-  router.put('/pay/:orderID', async (req, res) => {
+  router.post('/pay/:orderID', async (req, res) => {
     try {
       const { orderID } = req.params;
       const refund = await Refund.findOne({ refundID:orderID });
@@ -89,7 +89,7 @@ router.get('/', async (req, res) => {
         "originalTransactionId": payment.txnID,
         "merchantTransactionId": payment.agrijodTxnID,
         "amount": amountToBeRefunded,
-        "callbackUrl": `config.AGRIJOD_BASE_URL/refund/callback`
+        "callbackUrl": `config.AGRIJOD_BASE_URL/refunds/callback`
     }
     const base64 = encodeRequest(payload)
     const sign = `${base64}/pg/v1/refund${config.MERCHANT_KEY}`
@@ -116,7 +116,7 @@ router.get('/', async (req, res) => {
     }
   });
 
-router.post('/refund/callback', async (req,res)=>{
+router.post('/callback', async (req,res)=>{
   try {
     console.log(req.body.response)
     const callbackResponse = req.body.response
