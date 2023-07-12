@@ -10,7 +10,10 @@ const { default: axios } = require('axios');
 function encodeRequest(payload) {
   return Buffer.from(JSON.stringify(payload)).toString("base64");
 }
-
+const decodeResponse =(encodedPayload)=>{
+  const decodedPayload = Buffer.from(encodedPayload, 'base64').toString('utf-8');
+  return JSON.parse(decodedPayload);
+}
 /**
  * Generate the signature for the payload.
  * @param {string} payload - The payload to generate the signature for.
@@ -22,10 +25,7 @@ function generateSignature(payload) {
     .update(payload)
     .digest("hex");
 }
-function decodeResponse(encodedPayload) {
-  const decodedPayload = Buffer.from(encodedPayload, 'base64').toString('utf-8');
-  return JSON.parse(decodedPayload);
-}
+
 /**
  * Check the status of a transaction.
  * @param {string} transactionId - The transaction ID to check the status for.

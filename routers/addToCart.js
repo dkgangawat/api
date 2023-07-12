@@ -12,6 +12,7 @@ const { default: axios } = require("axios");
 const Payment = require("../models/paymentSchema");
 const config = require("../config/config");
 const { generateTransectionId, generateOrderID } = require("../helper/generateUniqueId");
+const { updateAvailableToday } = require("../helper/updateAvailableToday");
 
 let transportAlgoResult;
 
@@ -130,6 +131,7 @@ router.post("/", async (req, res) => {
         const vehicle = await Vehicle.findOne({
           vehicleId: transportAlgoResult.vehicleId,
         });
+        await updateAvailableToday(vehicle.vehicleId, vehicle.availableToday - transportAlgoResult.numberOfVehicle)
         shippingCost =
           ((await getPincodeDistance(vehicle.hubPinCode, item.pinCode)) +
             (await getPincodeDistance(item.pinCode, dropoffLocation))) *
@@ -147,9 +149,9 @@ router.post("/", async (req, res) => {
         merchantUserId: buyerID,
         merchantOrderId: orderID,
         amount: totalCost*100,
-        redirectUrl: 'https://api-aj.onrender.com/add-to-cart/payment/redirect',
+        redirectUrl: `${config.AGRIJOD_BASE_URL}/add-to-cart/payment/redirect`,
         redirectMode: 'POST',
-        callbackUrl: 'https://api-aj.onrender.com/add-to-cart/payment/callback',
+        callbackUrl: `'${config.AGRIJOD_BASE_URL}/add-to-cart/payment/callback`,
         mobileNumber: buyer.phone,
         paymentInstrument: {
           type: 'PAY_PAGE'
@@ -160,7 +162,7 @@ router.post("/", async (req, res) => {
       const XVerify = generateSignature(sign)+'###'+'1'
       const options = {
           method: 'POST',
-          url: 'https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay',
+          url: `${config.PHONEPE_BASE_URL}/pg/v1/pay`,
           headers: {
             accept: 'application/json',
             'Content-Type': 'application/json',
@@ -219,6 +221,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Payment route
 // Payment redirect route
 router.post('/payment/redirect', async (req, res) => {
   try {
@@ -248,6 +251,11 @@ router.post('/payment/callback', async (req, res) => {
       { paymentStatus: 'completed'}
     );
     await updateOrderStatus(payment.orderID, "Waiting for seller");
+    }else{
+      await Order.findOneAndUpdate(
+        { orderID:payment.orderID },
+        { paymentStatus:"failed" }
+      );
     }
     res.status(200).json({ message: 'Payment recorded successfully' });
   } catch (error) {
