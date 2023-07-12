@@ -118,19 +118,32 @@ router.get('/', async (req, res) => {
 
 router.post('/callback', async (req,res)=>{
   try {
-    console.log(req.body.response)
     const callbackResponse = req.body.response
     const data = decodeResponse(callbackResponse)
-    console.log(data)
-    // const {originalTransactionId,merchantTransactionId,amount,refundId,refundStatus} = data.data
-    // const refund = await Refund.findOne({refundID:originalTransactionId})
-    // if(!refund){
-    //   return res.status(404).json({ message: 'Refund not found' });
-    // }
-    // refund.transactionID = refundId
-    // refund.refundStatus = refundStatus
-    // const updatedRefund = await refund.save()
-    res.status(200).json({data})
+    const {transactionId,merchantTransactionId} = data.data
+    const  payment = await Payment.findOne({agrijodTxnID:merchantTransactionId})
+    const refund = await Refund.findOne({refundID:payment.orderID})
+    const order =  await Order.findOne({orderID:refund.refundID})
+    if(!refund){
+      return res.status(404).json({ message: 'Refund not found' });
+    }
+    refund.transactionID = merchantTransactionId
+    if(data.code === "PAYMENT_SUCCESS"){
+      refund.refundStatus = 'completed' 
+      if(order.partialRefund === true){
+        order.shippingCost = order.shippingCost - refund.shippingRefundAmount
+        order.productCost = order.productCost - refund.productRefundAmount
+        order.totalCost = order.totalCost - refund.amountToBeRefunded
+      }
+    }
+    else{
+      refund.refundStatus = 'failed'
+    }
+    payment.refundTxnID = transactionId
+    await refund.save()
+    await order.save()
+    await payment.save()
+    res.status(200).json({ message: `refund ${data.code}` });
   } catch (error) {
     console.error('Error updating refund:', error);
     res.status(500).json({ error: 'Internal server error',message:error.message });
