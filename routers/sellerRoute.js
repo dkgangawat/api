@@ -10,6 +10,8 @@ const {updateOrderStatus} = require('../helper/updateOrderStatus');
 const {updateTotalStocks} = require('../helper/updateTotalStocks');
 const {updateRefundStatus} = require('../helper/updateRefundStatus');
 const {addToRefundTable} = require('../helper/addToRefundTable');
+const Vehicle = require('../models/VehicleSchema');
+const { updateAvailableToday } = require('../helper/updateAvailableToday');
 
 
 router.post('/registration', async (req, res) => {
@@ -187,6 +189,10 @@ router.put('/orders/:orderId', async (req, res) => {
             const responce = await updateOrderStatus(orderId, "Item Canceled", 'reject')
             await addToRefundTable(orderId)
             const refundStatus = await updateRefundStatus(orderId, 'processing')
+            if(order.wantShipping === true && order.transporter?.vehicleId){
+              const vehicle= await Vehicle.findOne({vehicleId:order.transporter?.vehicleId})
+              await updateAvailableToday(order.transporter?.vehicleId, vehicle.availableToday + order.transporter?.numberOfVehicle )
+            }
             if (!responce || !refundStatus) {
                 return res.status(404).json({ message: "order not found" })
 
