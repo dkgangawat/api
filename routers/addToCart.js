@@ -250,7 +250,7 @@ router.post('/payment/callback', async (req, res) => {
       payment.txnID=transactionId
       payment.txnState=state
       await payment.save();
-    if(state==='COMPLETED'){
+    if(callbackResponse.code =='PAYMENT_SUCCESS'){
       const order = await Order.findOne({ orderID:payment.orderID })
       const refund = await Refund.findOne({refundID:payment.orderID})
       const seller = await Seller.findOne({s_id:order.sellerID})
@@ -278,5 +278,6 @@ router.post('/payment/callback', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 module.exports = router;
