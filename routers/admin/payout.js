@@ -7,7 +7,6 @@ router.get('/',async (req,res)=>{
         const payouts = await Payout.find().populate('payment').populate('order').populate('refund')
           const payoutDetails = payouts.map(payout => {
            const {payment,order,refund,seller,transporter}= payout
-          c
            return ({
             agrijodTxnID:payment.agrijodTxnID,
             txnState:payment.txnState,

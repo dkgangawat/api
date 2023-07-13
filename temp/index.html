@@ -76,7 +76,7 @@
       var password = document.getElementById('password').value;
 
       // Send data to Express server using fetch API
-      fetch('http://localhost:8000/buyer/login', {
+      fetch('/buyer/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

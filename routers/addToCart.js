@@ -7,7 +7,7 @@ const transportAlgo = require("../helper/transportAlgo");
 const getPincodeDistance = require("../helper/getPincodeDistance");
 const Vehicle = require("../models/VehicleSchema");
 const { cancelOrderIfPaymentNotCompleted } = require("../helper/cancelOrderIfPaymentNotCompleted");
-const { encodeRequest, generateSignature, decodeResponse } = require("../helper/pay");
+const { encodeRequest, generateSignature, decodeResponse, checkStatus } = require("../helper/pay");
 const { default: axios } = require("axios");
 const Payment = require("../models/paymentSchema");
 const config = require("../config/config");
@@ -230,7 +230,8 @@ router.post("/", async (req, res) => {
 router.post('/payment/redirect', async (req, res) => {
   try {
     const data = req.body;
-    res.json(data);
+    const chackstatusResponce = await checkStatus(data.transactionId)
+    res.json({data, chackstatusResponce:chackstatusResponce.response});
   }
   catch (error) {
     console.error(error);
