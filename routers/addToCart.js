@@ -231,7 +231,7 @@ router.post('/payment/redirect', async (req, res) => {
   try {
     const data = req.body;
     const chackstatusResponce = await checkStatus(data.transactionId)
-    res.json({data, chackstatusResponce:chackstatusResponce.response});
+    res.json({data, chackstatusResponce});
   }
   catch (error) {
     console.error(error);

@@ -41,7 +41,7 @@ async function checkStatus(transactionId) {
       accept: "application/json",
       "Content-Type": "application/json",
       "X-VERIFY": XVerify,
-      "X-MERCHANT-ID": data.merchantId,
+      "X-MERCHANT-ID": config.MERCHANT_ID,
     },
   };
   const response = await axios.request(options);
