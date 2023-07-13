@@ -258,13 +258,14 @@ router.post('/payment/callback', async (req, res) => {
       const transporter = await Transporter.findOne({transporterID:order.transporter?.transporterId})
       order.paymentStatus= 'completed'
       await order.save()
+      console.log(order,refund,seller,transporter)
     await updateOrderStatus(payment.orderID, "Waiting for seller");
     const payout = new Payout({
       payment:payment._id,
       order:order._id,
       refund:refund._id,
       seller:seller._id,
-      transporter:transporter._id,
+      transporter:transporter?._id,
     })
     await payout.save()
     }else{
