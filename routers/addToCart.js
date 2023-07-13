@@ -155,7 +155,7 @@ router.post("/", async (req, res) => {
         amount: totalCost*100,
         redirectUrl: `${config.AGRIJOD_BASE_URL}/add-to-cart/payment/redirect`,
         redirectMode: 'POST',
-        callbackUrl: `'${config.AGRIJOD_BASE_URL}/add-to-cart/payment/callback`,
+        callbackUrl: `${config.AGRIJOD_BASE_URL}/add-to-cart/payment/callback`,
         mobileNumber: buyer.phone,
         paymentInstrument: {
           type: 'PAY_PAGE'
