@@ -207,6 +207,12 @@ router.post("/", async (req, res) => {
       await payment.save()
       setTimeout(async () => {
         await cancelOrderIfPaymentNotCompleted(newOrder.orderID);
+        if(wantShipping && dropoffLocation){
+          const vehicle = await Vehicle.findOne({
+            vehicleId: newOrder.transporter?.vehicleId,
+          });
+          await updateAvailableToday(vehicle.vehicleId, vehicle.availableToday + newOrder.transporter?.numberOfVehicle)
+        }
       }, 8 * 60 * 60 * 1000)
       transportAlgoResult=null
       res.json({ orderID: newOrder.orderID, newOrder,payment:response.data});
