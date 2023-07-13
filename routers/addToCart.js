@@ -13,6 +13,11 @@ const Payment = require("../models/paymentSchema");
 const config = require("../config/config");
 const { generateTransectionId, generateOrderID } = require("../helper/generateUniqueId");
 const { updateAvailableToday } = require("../helper/updateAvailableToday");
+const Payout = require("../models/payoutSchema");
+const Refund = require("../models/refundSchema");
+const Seller = require("../models/seller");
+const Transporter = require("../models/transporterSchema");
+const { updateOrderStatus } = require("../helper/updateOrderStatus");
 
 let transportAlgoResult;
 
@@ -132,12 +137,10 @@ router.post("/", async (req, res) => {
           vehicleId: transportAlgoResult.vehicleId,
         });
         await updateAvailableToday(vehicle.vehicleId, vehicle.availableToday - transportAlgoResult.numberOfVehicle)
+        const distanceHubToPP = await getPincodeDistance(vehicle.hubPinCode, item.pinCode)
+        const distancePPToDP = await getPincodeDistance(item.pinCode, dropoffLocation)
         shippingCost =
-          ((await getPincodeDistance(vehicle.hubPinCode, item.pinCode)) +
-            (await getPincodeDistance(item.pinCode, dropoffLocation))) *
-            vehicle.ratePerKm *
-            transportAlgoResult.numberOfVehicle +
-          transportAlgoResult.numberOfVehicle * vehicle.loadingCharges;
+          ((distanceHubToPP +distancePPToDP) *vehicle.ratePerKm *transportAlgoResult.numberOfVehicle +transportAlgoResult.numberOfVehicle * vehicle.loadingCharges)
       }
 
       // Calculate total cost
@@ -151,7 +154,7 @@ router.post("/", async (req, res) => {
         amount: totalCost*100,
         redirectUrl: `${config.AGRIJOD_BASE_URL}/add-to-cart/payment/redirect`,
         redirectMode: 'POST',
-        callbackUrl: `'${config.AGRIJOD_BASE_URL}/add-to-cart/payment/callback`,
+        callbackUrl: `${config.AGRIJOD_BASE_URL}/add-to-cart/payment/callback`,
         mobileNumber: buyer.phone,
         paymentInstrument: {
           type: 'PAY_PAGE'
@@ -226,7 +229,8 @@ router.post("/", async (req, res) => {
 router.post('/payment/redirect', async (req, res) => {
   try {
     const data = req.body;
-    res.json(data);
+    const chackstatusResponce = await checkStatus(data.transactionId)
+    res.json({data, chackstatusResponce});
   }
   catch (error) {
     console.error(error);
@@ -245,12 +249,20 @@ router.post('/payment/callback', async (req, res) => {
       payment.txnID=transactionId
       payment.txnState=state
       await payment.save();
-    if(state==='COMPLETED'){
-      await Order.findOneAndUpdate(
-      { orderID:payment.orderID },
-      { paymentStatus: 'completed'}
-    );
+    if(callbackResponse.code =='PAYMENT_SUCCESS'){
+      const order = await Order.findOne({ orderID:payment.orderID })
+      const seller = await Seller.findOne({s_id:order.sellerID})
+      const transporter = await Transporter.findOne({transporterID:order.transporter?.transporterId})
+      order.paymentStatus= 'completed'
+      await order.save()
     await updateOrderStatus(payment.orderID, "Waiting for seller");
+    const payout = new Payout({
+      payment:payment._id,
+      order:order._id,
+      seller:seller._id,
+      transporter:transporter?._id,
+    })
+    await payout.save()
     }else{
       await Order.findOneAndUpdate(
         { orderID:payment.orderID },

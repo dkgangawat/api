@@ -4,7 +4,7 @@ const paymentSchema = new mongoose.Schema({
   agrijodTxnID: {
     type: String
   },
-  originalTxnID: String,
+  refundTxnID: String,
   buyerID: {
     type: String
   },
