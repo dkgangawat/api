@@ -27,6 +27,7 @@ const transportAlgo = async (pickupPincodes, orderSize, dropOffPincode,bagSize) 
     numberOfVehicles.sort((a, b) => {
       return ((a.distanceHubToPP + a.distancePPToDP) * a.vehicle.ratePerKm * a.noOfVehicleRequired + a.noOfVehicleRequired * a.vehicle.loadingCharges) - ((b.distanceHubToPP + b.distancePPToDP) * b.vehicle.ratePerKm * b.noOfVehicleRequired + b.noOfVehicleRequired * b.vehicle.loadingCharges);
     });
+    console.log(numberOfVehicles)
     let efficientTransporter;
     let efficientVehicle;
     let efficientNumberOfVehicles;

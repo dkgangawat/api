@@ -4,22 +4,21 @@ const router = new express.Router()
 
 router.get('/',async (req,res)=>{
     try{
-        const payouts = await Payout.find().populate('payment').populate('order').populate('refund')
+        const payouts = await Payout.find().populate('payment').populate('order').populate('seller').populate('transporter')
           const payoutDetails = payouts.map(payout => {
-           const {payment,order,refund,seller,transporter}= payout
+           const {payment,order,seller,transporter}= payout
            return ({
+            _id:payout._id,
             agrijodTxnID:payment.agrijodTxnID,
             txnState:payment.txnState,
             txnID:payment.txnID,
             amount:payment.amount,
             orderID: order.orderID,
-            refundAmount:refund.amountToBeRefunded,
             productCost :order.productCost,
             shippingCost  :order.shippingCost,
             sellerPayout: order.productCost*0.98,
             transporterPayout: order.shippingCost*0.99,
             orderStatus: order.status,
-            actionButton,
             disbursalStatus:payout.disbursalStatus
           })}
           );
@@ -30,10 +29,11 @@ router.get('/',async (req,res)=>{
           res.status(500).json({ error: 'Internal server error' });
         }
 })
-router.get('/view:payoutID',async (req, res)=>{
+router.get('/view/:payoutID',async (req, res)=>{
     try {
         const {payoutID} = req.params
-        const payout = Payout.findById(payoutID)
+        console.log(payoutID)
+        const payout = await Payout.findOne({_id:payoutID}).populate('payment').populate('order').populate('seller').populate('transporter')
         const {order,seller,transporter}= payout
         const actionButton={
             sellerID: seller.s_id,
@@ -54,11 +54,11 @@ router.get('/view:payoutID',async (req, res)=>{
     }
 })
 
-router.put('/update/txnids:payoutID' ,async (req,res)=>{
+router.put('/update/txnids/:payoutID' ,async (req,res)=>{
     try {
-        const {payoutID} = req.params
+        const {payoutID} =req.params
         const {sellerPayoutTxnID,transporterPayoutTxnID} = req.body
-        const payout = Payout.findById(payoutID)
+        const payout = await Payout.findOne({_id:payoutID}).populate('payment').populate('order').populate('seller').populate('transporter')
         payout.sellerPayoutTxnID = sellerPayoutTxnID
         payout.transporterPayoutTxnID = transporterPayoutTxnID
         const updatedPayout = await payout.save()
@@ -69,7 +69,7 @@ router.put('/update/txnids:payoutID' ,async (req,res)=>{
         res.status(500).json({ error: 'Internal server error' });
     }
 })
-router.put('/update/disbursal-status:payoutID' ,async (req,res)=>{
+router.put('/update/disbursal-status/:payoutID' ,async (req,res)=>{
     try {
         const {payoutID} = req.params
         const {disbursalStatus} = req.body
