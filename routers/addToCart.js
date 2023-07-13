@@ -13,6 +13,10 @@ const Payment = require("../models/paymentSchema");
 const config = require("../config/config");
 const { generateTransectionId, generateOrderID } = require("../helper/generateUniqueId");
 const { updateAvailableToday } = require("../helper/updateAvailableToday");
+const Payout = require("../models/payoutSchema");
+const Refund = require("../models/refundSchema");
+const Seller = require("../models/seller");
+const Transporter = require("../models/transporterSchema");
 
 let transportAlgoResult;
 
@@ -246,11 +250,21 @@ router.post('/payment/callback', async (req, res) => {
       payment.txnState=state
       await payment.save();
     if(state==='COMPLETED'){
-      await Order.findOneAndUpdate(
-      { orderID:payment.orderID },
-      { paymentStatus: 'completed'}
-    );
+      const order = await Order.findOne({ orderID:payment.orderID })
+      const refund = await Refund.findOne({refundID:payment.orderID})
+      const seller = await Seller.findOne({s_id:order.sellerID})
+      const transporter = await Transporter.findOne({transporterID:order.transporter?.transporterId})
+      order.paymentStatus= 'completed'
+      await order.save()
     await updateOrderStatus(payment.orderID, "Waiting for seller");
+    const payout = new Payout({
+      payment:payment._id,
+      order:order._id,
+      refund:refund._id,
+      seller:seller._id,
+      transporter:transporter._id,
+    })
+    await payout.save()
     }else{
       await Order.findOneAndUpdate(
         { orderID:payment.orderID },
