@@ -148,7 +148,7 @@ router.get('/orders/:status', async (req, res) => {
       if(paymentStatus === 'initiated' && wantShipping === false ){
         pickupPoint = 'Exact Location will be shared soon'
       }
-      if(wantShipping === false && paymentStatus === 'completed' && sellerVerified ==='pending'){
+      if(wantShipping === false && paymentStatus === 'completed' && sellerVerified ==='accept'){
         pickupPoint = itemRef.pickupAddresses
       }
       if(status === "Item Canceled"){
