@@ -7,7 +7,7 @@ const router = new express.Router();
 const {generateToken} = require('../helper/generateToken');
 const Order = require('../models/orderSchema');
 const Refund = require('../models/refundSchema');
-
+const { checkStatus } = require('../helper/pay');
 
 router.post('/registration', async (req, res) => {
   try {
@@ -184,6 +184,16 @@ router.post('/order/confirm-received/:orderId', async (req, res) => {
     res.status(500).json({error: 'Internal server error'});
   }
 });
+router.get('/payment-status/:transactionId', async (req,res)=>{
+  const {transactionId} = req.params;
+  try {
+    const chackstatusResponce = await checkStatus (transactionId)
+    res.status(200).json(chackstatusResponce)
+  } catch (error) {
+    console.error('Error: ', error);
+    res.status(500).json({error: 'Internal server error'});
+  }
+})
 router.get('/refunds', async (req, res) => {
   try {
     const userId = req.userId;
