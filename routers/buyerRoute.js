@@ -7,6 +7,7 @@ const router = new express.Router();
 const {generateToken} = require('../helper/generateToken');
 const Order = require('../models/orderSchema');
 const Refund = require('../models/refundSchema');
+const { checkStatus } = require('../helper/pay');
 
 
 router.post('/registration', async (req, res) => {
@@ -139,7 +140,7 @@ router.get('/orders/:status', async (req, res) => {
       return res.status(400).json({message: 'Invalid status'});
     }
     const orderDetails = orders.map((order)=>{
-      const {orderID, itemRef, orderSize, totalCost, paymentStatus, status, wantShipping} = order
+      const {orderID, itemRef, orderSize, totalCost, paymentStatus, status, wantShipping,sellerVerified} = order
       let pickupPoint  ="Exact Location will be shared soon";
       if(wantShipping ===true){
         pickupPoint = 'No worries!! Agrijod is your shipping partner'
@@ -147,7 +148,7 @@ router.get('/orders/:status', async (req, res) => {
       if(paymentStatus === 'initiated' && wantShipping === false ){
         pickupPoint = 'Exact Location will be shared soon'
       }
-      if(wantShipping === false && paymentStatus === 'completed'){
+      if(wantShipping === false && paymentStatus === 'completed' && sellerVerified ==='pending'){
         pickupPoint = itemRef.pickupAddresses
       }
       if(status === "Item Canceled"){
@@ -184,6 +185,16 @@ router.post('/order/confirm-received/:orderId', async (req, res) => {
     res.status(500).json({error: 'Internal server error'});
   }
 });
+router.get('/payment-status/:transactionId', async (req,res)=>{
+  const {transactionId} = req.params;
+  try {
+    const chackstatusResponce = await checkStatus(transactionId)
+    res.status(200).json(chackstatusResponce)
+  } catch (error) {
+    console.error('Error: ', error);
+    res.status(500).json({error: 'Internal server error'});
+  }
+})
 router.get('/refunds', async (req, res) => {
   try {
     const userId = req.userId;

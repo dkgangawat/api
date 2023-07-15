@@ -24,27 +24,38 @@ const transportAlgo = async (pickupPincodes, orderSize, dropOffPincode,bagSize) 
       });
       }
     }
+    const totalPrice = a=>(a.distanceHubToPP + a.distancePPToDP) * a.vehicle.ratePerKm * a.noOfVehicleRequired + a.noOfVehicleRequired * a.vehicle.loadingCharges
     numberOfVehicles.sort((a, b) => {
-      return ((a.distanceHubToPP + a.distancePPToDP) * a.vehicle.ratePerKm * a.noOfVehicleRequired + a.noOfVehicleRequired * a.vehicle.loadingCharges) - ((b.distanceHubToPP + b.distancePPToDP) * b.vehicle.ratePerKm * b.noOfVehicleRequired + b.noOfVehicleRequired * b.vehicle.loadingCharges);
+      return totalPrice(a)-totalPrice(b);
     });
-
+    const groupedArray = numberOfVehicles.reduce((result, object) => {
+      const lastGroup = result[result.length - 1];
+      if (lastGroup && lastGroup[0].noOfVehicleRequired === object.noOfVehicleRequired) {
+        lastGroup.push(object);
+      } else {
+        result.push([object]);
+      }
+      return result;
+    }, []);
+    
     let efficientTransporter;
     let efficientVehicle;
     let efficientNumberOfVehicles;
-    for (let i = 0; i < numberOfVehicles.length; i++) {
-      if (i === numberOfVehicles.length - 1) {
-        efficientTransporter = numberOfVehicles[i].vehicle.transporterID;
-        efficientVehicle = numberOfVehicles[i].vehicle;
-        efficientNumberOfVehicles = numberOfVehicles[i].noOfVehicleRequired;
-        break;
-      }
-      if (numberOfVehicles[i].noOfVehicleRequired <= numberOfVehicles[i + 1].noOfVehicleRequired) {
-        efficientTransporter = numberOfVehicles[i].vehicle.transporterID;
-        efficientVehicle = numberOfVehicles[i].vehicle;
-        efficientNumberOfVehicles = numberOfVehicles[i].noOfVehicleRequired;
+    if(groupedArray.length>0){
+      if(groupedArray[0].length===1){
+      efficientTransporter = groupedArray[0][0].vehicle.transporterID;
+      efficientVehicle = groupedArray[0][0].vehicle;
+      efficientNumberOfVehicles = groupedArray[0][0].noOfVehicleRequired;
+      }else{
+        groupedArray[0].sort((a,b)=>{
+          return a.noOfVehicleRequired - b.noOfVehicleRequired
+        })
+        efficientTransporter = groupedArray[0][0].vehicle.transporterID;  
+        efficientVehicle = groupedArray[0][0].vehicle;
+        efficientNumberOfVehicles = groupedArray[0][0].noOfVehicleRequired; 
 
-        break;
       }
+    
     }
     return {efficientVehicle, efficientTransporter, numberOfvehicles: efficientNumberOfVehicles};
   } catch (error) {
