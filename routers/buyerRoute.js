@@ -139,7 +139,7 @@ router.get('/orders/:status', async (req, res) => {
       return res.status(400).json({message: 'Invalid status'});
     }
     const orderDetails = orders.map((order)=>{
-      const {orderID, itemRef, orderSize, totalCost, paymentStatus, status, wantShipping} = order
+      const {orderID, itemRef, orderSize, totalCost, paymentStatus, status, wantShipping,sellerVerified} = order
       let pickupPoint  ="Exact Location will be shared soon";
       if(wantShipping ===true){
         pickupPoint = 'No worries!! Agrijod is your shipping partner'
