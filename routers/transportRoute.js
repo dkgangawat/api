@@ -2,8 +2,8 @@ const express = require('express');
 const router = new express.Router();
 const Transporter = require('../models/transporterSchema');
 const bcrypt = require('bcrypt');
-const { generateToken } = require('../helper/generateToken');
-const { generateVehicleId, generateHubId, generateAgriJodVerificationId } = require('../helper/generateUniqueId');
+const {generateToken} = require('../helper/generateToken');
+const {generateVehicleId, generateHubId, generateAgriJodVerificationId} = require('../helper/generateUniqueId');
 const Vehicle = require('../models/VehicleSchema');
 const {updateAvailableToday} = require('../helper/updateAvailableToday');
 const Order = require('../models/orderSchema');
@@ -151,17 +151,17 @@ router.post('/vehicle-category/:hubId', async (req, res) => {
       serviceableDropOffPoints,
       numberOfVehicles,
       status: 'Waiting for Approval',
-    }
+    };
     const vehicle = new Vehicle(vehicleData);
     const newVehicle = await vehicle.save();
     const vehicleUpdateRequest = new VehicleUpdateRequest({
-      requestId:generateAgriJodVerificationId(),
-      vehicle:newVehicle._id,
-      requestType:'add',
+      requestId: generateAgriJodVerificationId(),
+      vehicle: newVehicle._id,
+      requestType: 'add',
       ratePerKm,
       loadingCharges,
       serviceablePickupPoints,
-      serviceableDropOffPoints,})
+      serviceableDropOffPoints});
     await vehicleUpdateRequest.save();
     hub.vehicleCategories.push(newVehicle._id);
     await transporter.save();
@@ -197,32 +197,32 @@ router.put('/vehicle-management/available-today', async (req, res) => {
   }
 });
 
-router.put('/vehicle-management/update/:vehicleId', async(req, res) => {
-  const { vehicleId } = req.params;
+router.put('/vehicle-management/update/:vehicleId', async (req, res) => {
+  const {vehicleId} = req.params;
   const updatedFields = req.body;
   try {
-      const transporterID = req.userId;
-      const vehicle = await Vehicle.findOne({ vehicleId });
+    const transporterID = req.userId;
+    const vehicle = await Vehicle.findOne({vehicleId});
 
-      if (!vehicle || transporterID !== vehicle.transporterID) {
-          return res.status(404).json({ message: 'Vehicle not found' });
-      }
-      if (vehicle.status === 'Waiting for Approval') {
-        return res.json({message:'Vehicle is currently under review by the admin, please wait.... '})
-      }
-      const vehicleUpdateRequest = new VehicleUpdateRequest({
-          requestId:generateAgriJodVerificationId(),
-          vehicle:vehicle._id,
-          requestType:'update',
-          ...updatedFields})
-      vehicle.status = 'Waiting for Approval'
-      await vehicleUpdateRequest.save()
-      await vehicle.save();
+    if (!vehicle || transporterID !== vehicle.transporterID) {
+      return res.status(404).json({message: 'Vehicle not found'});
+    }
+    if (vehicle.status === 'Waiting for Approval') {
+      return res.json({message: 'Vehicle is currently under review by the admin, please wait.... '});
+    }
+    const vehicleUpdateRequest = new VehicleUpdateRequest({
+      requestId: generateAgriJodVerificationId(),
+      vehicle: vehicle._id,
+      requestType: 'update',
+      ...updatedFields});
+    vehicle.status = 'Waiting for Approval';
+    await vehicleUpdateRequest.save();
+    await vehicle.save();
 
-      res.status(200).json({ message: 'Vehicle updated successfully and request sent to Admin' });
+    res.status(200).json({message: 'Vehicle updated successfully and request sent to Admin'});
   } catch (error) {
-      console.error('Error: ', error);
-      res.status(500).json({ error: error.message });
+    console.error('Error: ', error);
+    res.status(500).json({error: error.message});
   }
 });
 

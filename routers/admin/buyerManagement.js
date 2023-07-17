@@ -49,11 +49,11 @@ router.get('/orders/:buyerID/:status', async (req, res) => {
       };
     });
 
-        res.status(200).json(orderDetails);
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        res.status(500).json({ error: `'Internal server error', ${error.message}` });
-    }
+    res.status(200).json(orderDetails);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({error: `'Internal server error', ${error.message}`});
+  }
 });
 
 router.get('/:buyerId', async (req, res) => {

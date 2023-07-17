@@ -7,14 +7,14 @@ const itemSchema = new mongoose.Schema({
     required: true,
   },
   itemDescription: String,
-  itemFieldArea:{
+  itemFieldArea: {
     type: Number,
     validate: {
       validator: function(value) {
-          return  value >= 0;
+        return value >= 0;
       },
       message: 'bagSize field must be a  number >= 0.',
-  }
+    },
   },
   harvestDate: {
     type: Date,
@@ -40,19 +40,19 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     validate: {
       validator: function(value) {
-          return  value > 0;
+        return value > 0;
       },
       message: 'bagSize field must be a  number > 0.',
-  }
+    },
   },
   totalStock: {
     type: Number,
     validate: {
       validator: function(value) {
-          return  value >= 0;
+        return value >= 0;
       },
       message: 'totalStock field must be a  number >= 0.',
-  }
+    },
   },
   specialRequest: {
     type: String,
@@ -61,32 +61,32 @@ const itemSchema = new mongoose.Schema({
     type: Number,
     validate: {
       validator: function(value) {
-          return Number.isInteger(value) && value >= 0;
+        return Number.isInteger(value) && value >= 0;
       },
       message: 'minOrderAmount must be a natural number (positive integer).',
-  }
+    },
   },
   price: {
     type: Number,
     validate: {
       validator: function(value) {
-          return  value > 0;
+        return value > 0;
       },
       message: 'price  must be > 0.',
-  }
+    },
   },
   pickupAddresses: [{
     type: String,
   }],
   postalAddress: {
-    type:String
+    type: String,
   },
   pinCode: {
     type: String,
   },
-  geolocationCoordinates:{
-    lng:String,
-    lat:String,
+  geolocationCoordinates: {
+    lng: String,
+    lat: String,
   },
   state: {
     type: String,
