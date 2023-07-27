@@ -2,28 +2,28 @@ const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
   agrijodTxnID: {
-    type: String
+    type: String,
   },
   refundTxnID: String,
   buyerID: {
-    type: String
+    type: String,
   },
   amount: {
-    type: Number
+    type: Number,
   },
   mobileNumber: {
-    type: String
+    type: String,
   },
   paymentInstrument: {
-    type:Object },
+    type: Object},
   txnID: {
-    type: String
+    type: String,
   },
   txnState: {
-    type: String
+    type: String,
   },
   orderID: {
-    type: String
+    type: String,
   },
 });
 

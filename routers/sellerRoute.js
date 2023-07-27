@@ -10,7 +10,7 @@ const {updateOrderStatus} = require('../helper/updateOrderStatus');
 const {updateTotalStocks} = require('../helper/updateTotalStocks');
 const {updateRefundStatus} = require('../helper/updateRefundStatus');
 const {addToRefundTable} = require('../helper/addToRefundTable');
-const { updateAvailableToday } = require('../helper/updateAvailableToday');
+const {updateAvailableToday} = require('../helper/updateAvailableToday');
 const Vehicle = require('../models/VehicleSchema');
 
 
@@ -179,35 +179,33 @@ router.put('/orders/:orderId', async (req, res) => {
   const {orderId} = req.params;
   const {status} = req.body;
 
-    try {
-        const order = await Order.findOne({ orderID: orderId })
-        const sellerId = req.userId
-        if (order.sellerID !== sellerId) {
-            return res.status(401).json({ message: 'Unauthorized' });
-        }
-        if (status === "accept") {
-            const responce = await updateOrderStatus(orderId, "Ready for pickup", 'accept')
-            if (!responce) {
-                return res.status(200).json({ message: `order already ${status}` })
-            }
-            if (!responce.success) {
-                return res.status(404).json({ message: "order not found" })
-
-            }
-        } else {
-            const responce = await updateOrderStatus(orderId, "Item Canceled", 'reject')
-            await addToRefundTable(orderId)
-            const refundStatus = await updateRefundStatus(orderId, 'processing')
-            if(order.wantShipping === true && order.transporter?.vehicleId){
-              const vehicle= await Vehicle.findOne({vehicleId:order.transporter?.vehicleId})
-              await updateAvailableToday(order.transporter?.vehicleId, vehicle.availableToday + order.transporter?.numberOfVehicle )
-            }
-            if (!responce || !refundStatus) {
-                return res.status(404).json({ message: "order not found" })
-
-            }
-        }
-        (status === "accept") ? await updateTotalStocks(orderId): ''
+  try {
+    const order = await Order.findOne({orderID: orderId});
+    const sellerId = req.userId;
+    if (order.sellerID !== sellerId) {
+      return res.status(401).json({message: 'Unauthorized'});
+    }
+    if (status === 'accept') {
+      const responce = await updateOrderStatus(orderId, 'Ready for pickup', 'accept');
+      if (!responce) {
+        return res.status(200).json({message: `order already ${status}`});
+      }
+      if (!responce.success) {
+        return res.status(404).json({message: 'order not found'});
+      }
+    } else {
+      const responce = await updateOrderStatus(orderId, 'Item Canceled', 'reject');
+      await addToRefundTable(orderId);
+      const refundStatus = await updateRefundStatus(orderId, 'processing');
+      if (order.wantShipping === true && order.transporter?.vehicleId) {
+        const vehicle= await Vehicle.findOne({vehicleId: order.transporter?.vehicleId});
+        await updateAvailableToday(order.transporter?.vehicleId, vehicle.availableToday + order.transporter?.numberOfVehicle );
+      }
+      if (!responce || !refundStatus) {
+        return res.status(404).json({message: 'order not found'});
+      }
+    }
+        (status === 'accept') ? await updateTotalStocks(orderId): '';
 
         res.status(200).json({message: `Order ${status}`});
   } catch (error) {

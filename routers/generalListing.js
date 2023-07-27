@@ -15,8 +15,8 @@ router.post('/', async (req, res) => {
       return res.status(404).json({error: 'seller not found'});
     }
     const {itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, isDraft} = req.body;
-   const postalAddress = await getPincodeAddress(pinCode)
-    const newItem = new Item({itemName, itemDescription, itemFieldArea, harvestDate, sowingDate,postalAddress, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, seller, isDraft});
+    const postalAddress = await getPincodeAddress(pinCode);
+    const newItem = new Item({itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, postalAddress, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, seller, isDraft});
     if (harvestDate.trim() && state.trim()) {
       if (totalStock < minOrderAmount) {
         return res.status(400).json({message: 'total stocks should me more than minimum order amount'});
@@ -50,7 +50,7 @@ router.put('/:itemID', async (req, res) => {
         throw new Error(` invalid field, ${field} `);
       }
     }
-    item.postalAddress = await getPincodeAddress(item.pinCode)
+    item.postalAddress = await getPincodeAddress(item.pinCode);
     const updatedItem = await item.save();
     res.status(200).json(updatedItem);
   } catch (error) {

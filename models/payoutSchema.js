@@ -1,28 +1,28 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const payoutSchema = new mongoose.Schema({
   payment: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Payment",
+    ref: 'Payment',
   },
   order: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Order",
+    ref: 'Order',
   },
   refund: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Refund",
+    ref: 'Refund',
   },
   seller: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Seller",
+    ref: 'Seller',
   },
   transporter: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Transporter",
+    ref: 'Transporter',
   },
-  sellerPayout:{
-    type:Number
+  sellerPayout: {
+    type: Number,
   },
   transporterPayout: {
     type: Number,
@@ -35,10 +35,10 @@ const payoutSchema = new mongoose.Schema({
   },
   disbursalStatus: {
     type: String,
-    enum: ["ICICI PENDING", "ICICI COMPLETED", "ICICI FAILED"],
+    enum: ['ICICI PENDING', 'ICICI COMPLETED', 'ICICI FAILED'],
   },
 });
 
-const Payout = mongoose.model("Payout", payoutSchema);
+const Payout = mongoose.model('Payout', payoutSchema);
 
 module.exports = Payout;

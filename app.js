@@ -26,7 +26,7 @@ app.use('/add-to-cart', authenticateToken, require('./routers/addToCart'));
 app.use('/transporter', authenticateToken, require('./routers/transportRoute'));
 app.use('/admin', require('./routers/admin/admin'));
 app.get('/', (req, res) => {
-    res.send('Welcome to AgriJod');
+  res.send('Welcome to AgriJod');
 });
 // app.use('/temp', require('./routers/temp'));
 

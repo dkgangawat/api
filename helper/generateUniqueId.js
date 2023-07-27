@@ -55,4 +55,4 @@ const generateTransectionId = () => {
   const randomString = Math.random().toString(36).substr(2, 6).toUpperCase();
   return `TXN${date}${randomString}`;
 };
-module.exports = {generateItemID, generateSellerID, generateBuyerID, generateOrderID, generateTransporterId, generateVehicleId, generateHubId, generateAgriJodVerificationId,generateTransectionId};
+module.exports = {generateItemID, generateSellerID, generateBuyerID, generateOrderID, generateTransporterId, generateVehicleId, generateHubId, generateAgriJodVerificationId, generateTransectionId};
