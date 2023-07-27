@@ -8,6 +8,7 @@ const authenticateToken = (req, res, next) => {
   }
   // const token = req.cookies.user;
   const authHeader = req.headers.authorization
+  console.log(authHeader)
   if (!authHeader) {
     return res.status(401).json({error: 'Unauthorized'});
   }
