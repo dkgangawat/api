@@ -159,7 +159,16 @@ router.get('/notifications', async (req, res) => {
 
   try {
     const orders = await Order.find({sellerID: userId, sellerVerified: 'pending', paymentStatus: 'completed'}).populate('itemRef');
-    res.json(orders);
+    const notificationsData =orders.map((order)=>{
+      return {
+        orderID:order.orderID,
+        itemName:order?.itemRef?.itemName,
+        totalCost:order.totalCost,
+        orderSize: order.orderSize,
+        pickupAddresses:order.itemRef?.pickupAddresses
+      }
+    })
+    res.json(notificationsData);
   } catch (error) {
     console.error('Error: ', error);
     res.status(500).json({error: 'Internal server error'});

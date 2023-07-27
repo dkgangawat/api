@@ -23,8 +23,7 @@ let transportAlgoResult;
 
 router.get("/", async (req, res) => {
   try {
-    const { itemID, orderSize, wantShipping, dropoffLocation } = req.body;
-
+    const { itemID, orderSize, wantShipping, dropoffLocation } = req.query;
     const item = await Item.findOne({ itemID });
 
     if (!item) {
@@ -34,7 +33,9 @@ router.get("/", async (req, res) => {
 
     // Calculate shipping cost
     let shippingCost = 0;
-  
+    if(wantShipping===false){
+      transportAlgoResult = null
+    }
     if (wantShipping && dropoffLocation) {
       if (!transportAlgoResult) {
         return res.status(404).json({ message: "Transport algo not executed" });
@@ -71,6 +72,7 @@ router.get("/", async (req, res) => {
     };
     res.status(200).json(addToCartViewField);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: error.message });
   }
 });
@@ -78,6 +80,7 @@ router.get("/", async (req, res) => {
 router.post("/transport-algo", async (req, res) => {
   try {
     const { itemID, orderSize, dropoffLocation } = req.body;
+    console.log(itemID, orderSize, dropoffLocation)
     const item = await Item.findOne({ itemID });
     if (!item) {
       return res.status(404).json({ message: "item not found" });
@@ -95,7 +98,6 @@ router.post("/transport-algo", async (req, res) => {
     ) {
       transportAlgoResult= null
       return res
-        .status(404)
         .json({ message: "transporter not avilabel right now on this route" });
     }
     transportAlgoResult = {
@@ -106,7 +108,7 @@ router.post("/transport-algo", async (req, res) => {
     res.status(200).json({ result: algoresult });
   } catch (error) {
     console.error("Error executing transport algorithm:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error", message:error.message });
   }
 });
 

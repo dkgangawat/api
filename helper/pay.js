@@ -36,7 +36,7 @@ async function checkStatus(transactionId) {
   const XVerify = generateSignature(sign) + "###" + "1";
   const options = {
     method: "GET",
-    url: `https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/status/${config.MERCHANT_ID}/${transactionId}`,
+    url: `${config.PHONEPE_BASE_URL}/pg/v1/status/${config.MERCHANT_ID}/${transactionId}`,
     headers: {
       accept: "application/json",
       "Content-Type": "application/json",

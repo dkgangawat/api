@@ -32,7 +32,7 @@ const buyerSchema = new mongoose.Schema({
   },
   fullName: String,
   category: String,
-  daeOfBitrth: Date,
+  dateOfBitrth: Date,
   establishmentYear: String,
   billingAddress: String,
   bankDetails: {

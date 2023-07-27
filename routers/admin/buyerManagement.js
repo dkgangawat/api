@@ -1,10 +1,12 @@
 const express = require('express');
 const Buyer = require('../../models/buyerSchema');
 const Order = require('../../models/orderSchema');
+const Payment = require('../../models/paymentSchema');
 const router = new express.Router();
 
 router.get('/', async (req, res) => {
   try {
+    console.log("rr")
     const buyers = await Buyer.find({}, 'b_id fullName ');
     res.status(200).json(buyers);
   } catch (error) {
@@ -20,10 +22,11 @@ router.get('/orders/:buyerID/:status', async (req, res) => {
     if (status === 'fulfilled') {
       orders = await Order.find({buyerID, status: 'fulfilled'}).populate('itemRef');
     } else {
-      orders = await Order.find({buyerID}).populate('itemRef');
+      orders = await Order.find({buyerID , status:{$ne:"fulfilled"}}).populate('itemRef');
     }
-
+    const payments = await Payment.find({buyerID: buyerID});
     const orderDetails = orders.map((order) => {
+      const payment = payments.filter((payment) => payment.orderID === order.orderID);
       let extraDetails = {};
 
       if (status === 'fulfilled') {
@@ -33,7 +36,7 @@ router.get('/orders/:buyerID/:status', async (req, res) => {
       } else {
         extraDetails = {
           dateOfTransaction: order.dateOfTransaction,
-          transactionID: order.transactionID,
+          transactionID: payment[0]?.agrijodTxnID,
           itemPrice: order.itemRef.price,
         };
       }
@@ -45,7 +48,7 @@ router.get('/orders/:buyerID/:status', async (req, res) => {
         payment: order.totalCost,
         quantity: order.orderSize,
         pickupPoint: order.itemRef.pickupAddresses,
-        orderStatus: order.orderStatus,
+        PaymentStatus: payment[0]?.txnState,
       };
     });
 

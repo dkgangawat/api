@@ -3,16 +3,21 @@ const cors = require('cors');
 const app = express();
 const cookieParser = require('cookie-parser');
 const {authenticateToken} = require('./middlewares/authenticateToken');
-
+const config = require('./config/config');
+app.use(cookieParser());
 require('./config/db');
 require('dotenv').config();
-require('./helper/getPincodeAddress')
-app.use(cors());
+app.use(cors(
+    {
+        origin: config.AJ_CLIENT_BASE_URL,
+        credentials: true,
+    }
+));
 app.use(require('./routers/agrijod-actuator'));
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(cookieParser());
+
 
 app.use('/seller', authenticateToken, require('./routers/sellerRoute'));
 app.use('/item', authenticateToken, require('./routers/generalListing'));
