@@ -7,6 +7,7 @@ const config = require('./config/config');
 app.use(cookieParser());
 require('./config/db');
 require('dotenv').config();
+console.log(config.AJ_CLIENT_BASE_URL)
 app.use(cors(
     {
         origin: config.AJ_CLIENT_BASE_URL,
