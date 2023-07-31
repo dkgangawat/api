@@ -15,6 +15,7 @@ router.get('/', async (req, res) => {
 });
 router.post('/request/:requestId/:action', async (req, res) => {
   const {requestId, action} = req.params;
+  console.log(requestId, action)
   try {
     if (action !== 'accept' && action !== 'reject') throw new Error('action must be either accept or reject');
     const request = await AgriJodVerificationRequest.findOne({requestId});

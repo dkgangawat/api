@@ -10,5 +10,4 @@ admin.use('/transporter-management', require('./transporterManagement'));
 admin.use('/refunds', require('./refunds'));
 admin.use('/payments', require('./paymentManagement'));
 admin.use('/payout', require('./payout'));
-
 module.exports = admin;
