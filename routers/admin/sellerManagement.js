@@ -1,6 +1,7 @@
 const express = require('express');
 const Seller = require('../../models/seller');
 const Item = require('../../models/ItemListing');
+const Order = require('../../models/orderSchema');
 const router = new express.Router();
 
 router.get('/', async (req, res) => {
@@ -93,6 +94,25 @@ router.put('/:sellerID', async (req, res) => {
     res.json(seller);
   } catch (error) {
     console.error('Error updating seller details:', error);
+    res.status(500).json({error: 'Internal server error'});
+  }
+});
+
+router.get('/:sellerID/orders/:status', async (req, res) => {
+  const { sellerID,status} = req.params;
+  const userId = sellerID;
+  try {
+    if (status === 'pending') {
+      const orders = await Order.find({sellerID: userId, $and: [{status: {$ne: null}}, {status: {$ne: 'fulfilled'}}], paymentStatus: 'completed'}).populate('itemRef');
+      return res.json(orders);
+    } else if (status === 'fulfilled') {
+      const orders = await Order.find({sellerID: userId, status: 'fulfilled', paymentStatus: 'completed'}).populate('itemRef');
+      res.json(orders);
+    } else {
+      return res.status(400).json({message: 'Invalid status'});
+    }
+  } catch (error) {
+    console.error('Error retrieving orders:', error);
     res.status(500).json({error: 'Internal server error'});
   }
 });

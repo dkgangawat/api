@@ -15,6 +15,7 @@ router.get('/', async (req, res) => {
     }
     const transporterDetails = transporters.map((transporter) => {
       return {
+        transporterID: transporter.transporterID,
         phone: transporter.phone,
         email: transporter.email,
         pocName: transporter.details?.pocName,
@@ -37,6 +38,7 @@ router.get('/requests', async (req, res) => {
     if (!requests) {
       return res.status(404).json({message: 'no requests right now'});
     }
+    
     const requestsDetails = requests.map((request) => ({
       requestId: request.requestId,
       transporterID: request.vehicle?.transporterID,

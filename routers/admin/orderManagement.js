@@ -19,6 +19,7 @@ router.get('/', async (req, res) => {
         shippingOpted = {
           ...shippingOpted,
           shippingOpted: 'Yes',
+          dropOfPincode:order.dropoffLocation,
           transporterID: order.transporter?.transporterId,
           vehicleId: order.transporter?.vehicleId,
           numberOfVehicle: order.transporter?.numberOfVehicle,
