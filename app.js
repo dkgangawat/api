@@ -9,7 +9,7 @@ require('./config/db');
 require('dotenv').config();
 app.use(cors(
     {
-        origin: 'http://localhost:3000',
+        origin: config.AJ_CLIENT_BASE_URL,
         credentials: true,
     }
 ));

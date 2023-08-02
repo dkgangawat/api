@@ -41,7 +41,6 @@ router.put('/details', async (req, res) => {
     if (!buyer) {
       return res.status(404).json({error: 'buyer not found'});
     }
-
     for (const field in updatedFields) {
       if (field in buyer) {
         buyer[field] = updatedFields[field];
@@ -80,7 +79,6 @@ router.get('/specific', async (req, res) => {
 // login buyer
 router.post('/login', async (req, res) => {
   const {emailOrPhone, password} = req.body;
-
   try {
     const buyer = await Buyer.findOne({
       $or: [{email: emailOrPhone}, {phone: emailOrPhone}],
