@@ -13,6 +13,8 @@ app.use(cors(
         credentials: true,
     }
 ));
+
+
 app.use(require('./routers/agrijod-actuator'));
 
 app.use(express.json());
