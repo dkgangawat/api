@@ -15,6 +15,7 @@ router.post('/', async (req, res) => {
       return res.status(404).json({error: 'seller not found'});
     }
     const {itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, isDraft} = req.body;
+    console.log(pinCode)
     const postalAddress = await getPincodeAddress(pinCode);
     const newItem = new Item({itemName, itemDescription, itemFieldArea, harvestDate, sowingDate, postalAddress, itemImages, bagSize, totalStock, specialRequest, minOrderAmount, price, pickupAddresses, pinCode, state, schedulePublishDate, seller, isDraft});
     if (harvestDate.trim() && state.trim()) {

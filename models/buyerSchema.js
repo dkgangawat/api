@@ -32,10 +32,11 @@ const buyerSchema = new mongoose.Schema({
   },
   fullName: String,
   category: String,
-  dateOfBitrth: Date,
+  dateOfBirth: Date,
   establishmentYear: String,
   billingAddress: String,
   bankDetails: {
+    passbook: String,
     accountNumber: {
       type: String,
       match: regex.bankAccountNumber,

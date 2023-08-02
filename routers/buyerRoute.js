@@ -41,7 +41,6 @@ router.put('/details', async (req, res) => {
     if (!buyer) {
       return res.status(404).json({error: 'buyer not found'});
     }
-
     for (const field in updatedFields) {
       if (field in buyer) {
         buyer[field] = updatedFields[field];

@@ -45,7 +45,6 @@ router.put('/details', async (req, res) => {
     const updatedFields = req.body;
     // const { fullName, dateOfBirth, currentAddress, addressProof, bankDetails, escrowTermsAccepted, sellerVerificationDocuments, highestQualification, draft } = req.body;
     const seller = await Seller.findOne({s_id: sId});
-    console.log(seller);
     if (!seller) {
       return res.status(404).json({error: 'Seller not found'});
     }
