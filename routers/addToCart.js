@@ -57,17 +57,20 @@ router.get('/', async (req, res) => {
       minOrderAmount,
       totalStock,
       pinCode,
+      itemImages
     } = item;
     const addToCartViewField = {
       itemID,
       itemDescription,
       price,
+      itemImages,
       bagSize,
       minOrderAmount,
       totalStock,
       pinCode: !wantShipping ? pinCode:'',
       productCost,
       shippingCost,
+
       totalCost: productCost + shippingCost,
     };
     res.status(200).json(addToCartViewField);
@@ -154,7 +157,7 @@ router.post('/', async (req, res) => {
         merchantUserId: buyerID,
         merchantOrderId: orderID,
         amount: totalCost*100,
-        redirectUrl: `${config.AGRIJOD_BASE_URL}/add-to-cart/payment/redirect`,
+        redirectUrl: `${config.AJ_CLIENT_BASE_URL}/buyer/my-orders/pending`,
         redirectMode: 'POST',
         callbackUrl: `${config.AGRIJOD_BASE_URL}/add-to-cart/payment/callback`,
         mobileNumber: buyer.phone,

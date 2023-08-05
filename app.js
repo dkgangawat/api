@@ -9,10 +9,12 @@ require('./config/db');
 require('dotenv').config();
 app.use(cors(
     {
-        origin: config.AJ_CLIENT_BASE_URL,
+        origin: '*',
         credentials: true,
     }
 ));
+
+
 app.use(require('./routers/agrijod-actuator'));
 
 app.use(express.json());

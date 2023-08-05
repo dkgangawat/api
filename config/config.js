@@ -11,7 +11,7 @@ const config = {
   PHONEPE_CALLBACK_URL: process.env.PHONEPE_CALLBACK_URL || "https://api-preprod.phonepe.com/apis/pg-sandbox",
   AGRIJOD_BASE_URL: process.env.AGRIJOD_BASE_URL || "http://16.170.219.8:8000",
   POSTAL_ADDRESS_API:process.env.POSTAL_ADDRESS_API,
-  AJ_CLIENT_BASE_URL: process.env.AJ_CLIENT_BASE_URL
+  AJ_CLIENT_BASE_URL: process.env.AJ_CLIENT_BASE_URL || 'https://main.d3orhinag3f2ix.amplifyapp.com'
 };  
 
 module.exports = config;
