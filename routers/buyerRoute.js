@@ -26,7 +26,7 @@ router.post('/registration', async (req, res) => {
     res.status(201).json({message: 'Step 1: Registration completed successfully as a Buyer', b_id: createdUser.b_id});
   } catch (error) {
     console.error('Error creating Buyer', error);
-    res.status(500).json({error: 'Failed to create Buyer'});
+    res.status(500).json({error: 'Failed to create Buyer', message: error.message});
   }
 });
 
