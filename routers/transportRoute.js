@@ -28,7 +28,7 @@ router.post('/registration', async (req, res) => {
     res.status(201).json({transporterID: newTransporter.transporterID, newTransporter});
   } catch (error) {
     console.error('Error registering transporter:', error);
-    res.status(500).json({error: `Internal server error`, message: error.message});
+    res.status(500).json({error: `Internal server error, ${error.message}`});
   }
 });
 
@@ -278,10 +278,10 @@ router.get('/orders/:status', async (req, res) => {
     res.status(500).json({error: 'Internal server error'});
   }
 });
-router.put('/update-order-status/:orderId', async (req, res) => {
-  const {orderId} = req.params;
+router.put('/update-order-status/:orderId/:status', async (req, res) => {
+  const {orderId,status} = req.params;
   const {userId} = req;
-  const {status} = req.body;
+  console.log(orderId,status,userId)
 
   try {
     const order = await Order.findOne({'orderID': orderId, 'transporter.transporterId': userId});
