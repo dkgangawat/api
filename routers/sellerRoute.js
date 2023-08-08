@@ -26,6 +26,7 @@ router.post('/registration', async (req, res) => {
     });
 
     const createdUser = await seller.save();
+
     const token = generateToken(createdUser.s_id);
     res.cookie('user', token);
     // res.redirect(`/seller-details/${createdUser._id}`)
@@ -33,7 +34,7 @@ router.post('/registration', async (req, res) => {
     // res.status(302).send(`<html><body><p> Redirecting to <a href=${`/seller-details/${}`}></a> </p></body></html>`)
   } catch (error) {
     console.error('Error creating seller', error);
-    res.status(500).json({error: 'Failed to create seller'});
+    res.status(500).json({error: 'Failed to create seller', message: error.message});
   }
 });
 
