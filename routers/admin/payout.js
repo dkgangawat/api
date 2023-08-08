@@ -4,15 +4,16 @@ const router = new express.Router();
 
 router.get('/', async (req, res)=>{
   try {
-    const payouts = await Payout.find().populate('payment').populate('order').populate('seller').populate('transporter');
+    const payouts = await Payout.find().populate('payment').populate('order').populate('seller').populate('transporter').populate('refund');
     const payoutDetails = payouts.map((payout) => {
-      const {payment, order, seller, transporter}= payout;
+      const {payment, order,refund, seller, transporter}= payout;
       return ({
         _id: payout._id,
         agrijodTxnID: payment.agrijodTxnID,
         txnState: payment.txnState,
         txnID: payment.txnID,
         amount: payment.amount,
+        refund,
         orderID: order.orderID,
         productCost: order.productCost,
         shippingCost: order.shippingCost,

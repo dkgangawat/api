@@ -7,10 +7,11 @@ const addToRefundTable = async (orderID) => {
     if (!order) {
       throw new Error('invalid order id');
     }
+    // for item canceled and payment not done
     let amountToBeRefunded =0;
     let shippingRefundAmount =0;
     let productRefundAmount =0;
-    if (order.status =='Item Canceled') {
+    if (order.status =='Item Canceled' && order.paymentStatus =='completed') {
       productRefundAmount=order.productCost;
       shippingRefundAmount=order.shippingCost;
       amountToBeRefunded= order.totalCost;

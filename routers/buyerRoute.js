@@ -79,7 +79,6 @@ router.get('/specific', async (req, res) => {
 // login buyer
 router.post('/login', async (req, res) => {
   const {emailOrPhone, password} = req.body;
-
   try {
     const buyer = await Buyer.findOne({
       $or: [{email: emailOrPhone}, {phone: emailOrPhone}],

@@ -197,7 +197,7 @@ router.put('/orders/:orderId', async (req, res) => {
       await addToRefundTable(orderId);
       const refundStatus = await updateRefundStatus(orderId, 'processing');
       if (order.wantShipping === true && order.transporter?.vehicleId) {
-        const vehicle= await Vehicle.findOne({vehicleId: order.transporter?.vehicleId});
+        const vehicle= await Vehicle.findOne({vehicleId: order.transporter?.vehicleId, isActive: true});
         await updateAvailableToday(order.transporter?.vehicleId, vehicle.availableToday + order.transporter?.numberOfVehicle );
       }
       if (!responce || !refundStatus) {

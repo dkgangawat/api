@@ -18,6 +18,7 @@ const Refund = require('../models/refundSchema');
 const Seller = require('../models/seller');
 const Transporter = require('../models/transporterSchema');
 const {updateOrderStatus} = require('../helper/updateOrderStatus');
+const { cronJobToCanclePayment } = require('../helper/cronJobToCanclePayment');
 
 let transportAlgoResult;
 
@@ -42,6 +43,7 @@ router.get('/', async (req, res) => {
       }
       const vehicle = await Vehicle.findOne({
         vehicleId: transportAlgoResult.vehicleId,
+        isActive: true,
       });
       shippingCost =
         ((await getPincodeDistance(vehicle.hubPinCode, item.pinCode)) +
@@ -80,7 +82,6 @@ router.get('/', async (req, res) => {
 router.post('/transport-algo', async (req, res) => {
   try {
     const { itemID, orderSize, dropoffLocation } = req.body;
-    console.log(itemID, orderSize, dropoffLocation)
     const item = await Item.findOne({ itemID });
     if (!item) {
       return res.status(404).json({message: 'item not found'});
@@ -137,6 +138,7 @@ router.post('/', async (req, res) => {
         }
         const vehicle = await Vehicle.findOne({
           vehicleId: transportAlgoResult.vehicleId,
+          isActive: true,
         });
         await updateAvailableToday(vehicle.vehicleId, vehicle.availableToday - transportAlgoResult.numberOfVehicle);
         const distanceHubToPP = await getPincodeDistance(vehicle.hubPinCode, item.pinCode);
@@ -207,15 +209,17 @@ router.post('/', async (req, res) => {
           },
       );
       await payment.save();
-      setTimeout(async () => {
-        await cancelOrderIfPaymentNotCompleted(newOrder.orderID);
-        if (wantShipping && dropoffLocation) {
-          const vehicle = await Vehicle.findOne({
-            vehicleId: newOrder.transporter?.vehicleId,
-          });
-          await updateAvailableToday(vehicle.vehicleId, vehicle.availableToday + newOrder.transporter?.numberOfVehicle);
-        }
-      }, 8 * 60 * 60 * 1000);
+      cronJobToCanclePayment(newOrder.orderID)
+      // setTimeout(async () => {
+      //   await cancelOrderIfPaymentNotCompleted(newOrder.orderID);
+      //   if (wantShipping && dropoffLocation) {
+      //     const vehicle = await Vehicle.findOne({
+      //       vehicleId: newOrder.transporter?.vehicleId,
+      //       isActive: true,
+      //     });
+      //     await updateAvailableToday(vehicle.vehicleId, vehicle.availableToday + newOrder.transporter?.numberOfVehicle);
+      //   }
+      // }, 8 * 60 * 60 * 1000);
       transportAlgoResult=null;
       res.json({orderID: newOrder.orderID, newOrder, payment: response.data});
     } else {
@@ -227,7 +231,7 @@ router.post('/', async (req, res) => {
           });
     }
   } catch (error) {
-    console.error(error);
+    console.error( 'error while executing payment request',error);
     res.status(500).json({error: error.message});
   }
 });

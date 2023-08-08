@@ -3,7 +3,7 @@ const Vehicle = require('../models/VehicleSchema');
 
 const updateAvailableToday = async (vehicleId, noOfVehicles) => {
   try {
-    const vehicle = await Vehicle.findOne({vehicleId});
+    const vehicle = await Vehicle.findOne({vehicleId, isActive: true});
     if (!vehicle) {
       return {success: false, error: 'vehicle not found'};
     }

@@ -3,7 +3,9 @@ const AgriJodVerificationRequest = require('../models/agriJodVerificationRequest
 
 const deleteAJVR = async (requestId) => {
   try {
-    const deletedRequest = await AgriJodVerificationRequest.findOneAndDelete({requestId});
+    const deletedRequest = await AgriJodVerificationRequest.findOne({requestId});
+    deletedRequest.isActive = false;
+    await deletedRequest.save();
     if (!deletedRequest) {
       return {success: false, error: 'Verification request not found'};
     }

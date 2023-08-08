@@ -1,3 +1,4 @@
+const Vehicle = require('../models/VehicleSchema');
 const Order = require('../models/orderSchema');
 const {addToRefundTable} = require('./addToRefundTable');
 const {updateRefundStatus} = require('./updateRefundStatus');
@@ -18,6 +19,13 @@ const cancelOrderIfPaymentNotCompleted = async (orderID) => {
       await order.save();
       await addToRefundTable(order.orderID);
       await updateRefundStatus(order.orderID, 'processing');
+      if ( order.wantShipping ===true && order.dropoffLocation) {
+            const vehicle = await Vehicle.findOne({
+              vehicleId: order.transporter?.vehicleId,
+              isActive: true,
+            });
+            await updateAvailableToday(vehicle.vehicleId, vehicle.availableToday + order.transporter?.numberOfVehicle);
+          }
       return `Order ${orderID} has been cancelled.`;
     }
   } catch (error) {

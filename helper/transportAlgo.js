@@ -8,6 +8,7 @@ const transportAlgo = async (pickupPincodes, orderSize, dropOffPincode, bagSize)
       status: 'Approved',
       serviceablePickupPoints: {$in: [pickupPincodes]},
       serviceableDropOffPoints: {$in: [dropOffPincode]},
+      isActive: true,
     });
     const numberOfVehicles = [];
 

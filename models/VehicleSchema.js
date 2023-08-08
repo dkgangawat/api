@@ -49,6 +49,10 @@ const vehicleSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  }
 });
 
 const Vehicle = mongoose.model('Vehicle', vehicleSchema);

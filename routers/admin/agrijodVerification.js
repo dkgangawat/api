@@ -6,7 +6,7 @@ const router = new express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const requests = await AgriJodVerificationRequest.find({});
+    const requests = await AgriJodVerificationRequest.find({isActive: true});
     res.json(requests);
   } catch (error) {
     console.error('Error retrieving verification details:', error);
@@ -15,10 +15,9 @@ router.get('/', async (req, res) => {
 });
 router.post('/request/:requestId/:action', async (req, res) => {
   const {requestId, action} = req.params;
-  console.log(requestId, action)
   try {
     if (action !== 'accept' && action !== 'reject') throw new Error('action must be either accept or reject');
-    const request = await AgriJodVerificationRequest.findOne({requestId});
+    const request = await AgriJodVerificationRequest.findOne({requestId, isActive: true});
     if (!request) {
       return res.status(404).json({error: 'agrijod verification request not found'});
     }

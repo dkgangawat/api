@@ -33,6 +33,10 @@ const vehicleUpdateSchema = new mongoose.Schema({
       String,
     ],
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  }
 }, {timestamps: true});
 
 const VehicleUpdateRequest = mongoose.model('VehicleUpdateRequest', vehicleUpdateSchema);

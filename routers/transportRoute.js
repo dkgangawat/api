@@ -202,7 +202,7 @@ router.put('/vehicle-management/update/:vehicleId', async (req, res) => {
   const updatedFields = req.body;
   try {
     const transporterID = req.userId;
-    const vehicle = await Vehicle.findOne({vehicleId});
+    const vehicle = await Vehicle.findOne({vehicleId, isActive: true});
 
     if (!vehicle || transporterID !== vehicle.transporterID) {
       return res.status(404).json({message: 'Vehicle not found'});
@@ -232,7 +232,7 @@ router.delete('/vehicle-management/update/:vehicleId/delete', async (req, res) =
   try {
     const transporterID = req.userId;
     const transporter = await Transporter.findOne({transporterID});
-    const vehicel = await Vehicle.findOne({vehicleId});
+    const vehicel = await Vehicle.findOne({vehicleId, isActive: true});
     if (!vehicel || transporterID !== vehicel.transporterID) {
       return res.status(404).json({message: 'vehicel not found'});
     }
@@ -240,8 +240,9 @@ router.delete('/vehicle-management/update/:vehicleId/delete', async (req, res) =
       return res.status(404).json('transporterID not found');
     }
 
-    const deleteVehicle = await Vehicle.findOneAndRemove({vehicleId});
-
+    const deleteVehicle = await Vehicle.findOne({vehicleId});
+    deleteVehicle.isActive = false;
+    await deleteVehicle.save();
     transporter.hubs.forEach((hub) => {
       hub.vehicleCategories.forEach((vehicleCategory, index) => {
         if (vehicleCategory.equals(deleteVehicle._id)) {

@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
 
 router.get('/requests', async (req, res) => {
   try {
-    const requests = await VehicleUpdateRequest.find({}).populate('vehicle');
+    const requests = await VehicleUpdateRequest.find({isActive:true}).populate('vehicle');
     if (!requests) {
       return res.status(404).json({message: 'no requests right now'});
     }
@@ -75,7 +75,7 @@ router.post('/request/:requestId/:action', async (req, res) => {
   try {
     if (action !== 'accept' && action !== 'reject') throw new Error('action must be either accept or reject');
     const request = await VehicleUpdateRequest.findOne({requestId}).populate('vehicle');
-    const vehicle = await Vehicle.findOne({vehicleId: request.vehicle?.vehicleId});
+    const vehicle = await Vehicle.findOne({vehicleId: request.vehicle?.vehicleId, isActive: true});
 
     if (!request || !vehicle) {
       return res.status(404).json({error: 'invalid requestId'});
@@ -97,7 +97,8 @@ router.post('/request/:requestId/:action', async (req, res) => {
 
 
     await vehicle.save();
-    await request.deleteOne();
+    request.isActive = false;
+    await request.save();
     res.json({message});
   } catch (error) {
     console.error('Error updating verification action:', error);
